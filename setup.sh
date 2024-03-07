@@ -12,9 +12,9 @@ fi
 
 # Check if EMAIL parameter is passed
 if [[ "E$EMAIL" = "E" ]]; then
-   EMAIL="Palanisamy.K.Payiran@irs.gov,Sudha.Putla@irs.gov,christopher.g.pouliot@irs.gov"
+   EMAIL="email@here.com"
 else
-   EMAIL="Palanisamy.K.Payiran@irs.gov,Sudha.Putla@irs.gov,christopher.g.pouliot@irs.gov,${EMAIL}"
+   EMAIL="email@here.com,${EMAIL}"
 fi
 
 echo "EMAIL=$EMAIL"
