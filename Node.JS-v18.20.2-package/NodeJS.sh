@@ -12,6 +12,7 @@
 # To verify ./NodeJS.sh verify
 ###################################################################################################################################################################
 # Common Variables
+echo "Deployment Directory=${deploy_dir}"
 EMAIL_RECIPIENT=christopher.g.pouliot@irs.gov
 HOSTNAME="$(uname -n)"
 INSTALLDIR='/usr/local/lib/nodejs18' # NodeJS Install Directory
@@ -19,6 +20,8 @@ VERSION18=v18.20.2
 DISTRO18=linux-x64
 LOGDIR=/tmp
 DATE=`date +%m%d%Y`
+FILEPATH="${INSTALLDIR}"/node-"${VERSION18}"-"${DISTRO18}"
+echo ${FILEPATH}
 
 echo "MODE=${MODE}"
 printf "MODE=%s\n" ${MODE}
@@ -60,13 +63,23 @@ send_email() {
 
 install() {
     log 'Starting Install Function'
-    LOG_FILE='NodeJS-install.log'
+    NODEJSFILE=$(find . -maxdepth 1 -name '*.tar.xz' -print -quit)
+    FILENAME=$(basename -- "${NODEJSFILE}")
+    LOG_FILE="${FILENAME}-install.log"
     ACTION_PERFORMED='install'
     EMAIL_SUBJECT="${HOSTNAME}: ${LOGDIR}/${LOG_FILE} ${ACTION_PERFORMED} action completed successfully on $(date)."
-
+    
+    
+    # Check if the file was found
+    if [ -z "${NODEJSFILE}" ]; then
+        echo 'NodeJS TAR not found.'
+        exit 1
+    fi
+    
+    
     printf "\n" > ${LOGDIR}/${LOG_FILE}
 
-    yum install -y openssl-devel bzip2-devel libicu-devel gcc-c++ make 2>&1 |sed G >> ${LOGDIR}/${LOG_FILE}
+    yum install -y openssl-devel bzip2-devel libicu-devel gcc-c++ make 2>&1 | tee -a ${LOGDIR}/${LOG_FILE}
     if [ $? -ne 0 ]; then
         log 'Failed to install PreReq Libraries. Exiting.'
         exit 1
@@ -95,58 +108,64 @@ install() {
 
     #Refresh .bash_prof
     . ~/.bash_profile > /dev/null
-
-    log "Extracting node-${VERSION18}-${DISTRO18}.tar.xz"
-
+    pwd
+    ls -la
+    log "Extracting "${NODEJSFILE}""
     mkdir -p ${INSTALLDIR}
-    tar -xvf node-${VERSION18}-${DISTRO18}.tar.xz -C $INSTALLDIR |sed G >> ${LOGDIR}/${LOG_FILE}
+    tar -xvJf "${deploy_dir}/${NODEJSFILE}" -C "${INSTALLDIR}" 2>&1 | tee -a ${LOGDIR}/${LOG_FILE}
+    if [ $? -ne 0 ]; then
+        log "Failed Extracting "${NODEJSFILE}""
+        exit 2
+    else
+        log "Successfully Extracting "${NODEJSFILE}""
+    fi
     chmod 755 -R ${INSTALLDIR}
 
     if [ $? = "0" ]; then
-        printf "The command to install NodeJS ${VERSION18} on ${INSTALLDIR} ran successfully" |sed G >> ${LOGDIR}/${LOG_FILE}
-        printf "Fixing npm logging issue" |sed G >> ${LOGDIR}/${LOG_FILE}
+        log "The command to extract NodeJS ${VERSION18} on ${INSTALLDIR} ran successfully"
+        log "Fixing npm logging issue"
         cd "${INSTALLDIR}/node-${VERSION18}-${DISTRO18}/lib/node_modules/npm/node_modules/npmlog/lib"
         cp log.js log.js.org
         sed -i -e 's|log.progressEnabled|//log.progressEnabled|' log.js
         if grep "//log.progressEnabled" log.js > /dev/null; then
-            printf "npm logging fix applied successfully" |sed G >> ${LOGDIR}/${LOG_FILE}
+            log 'npm logging fix applied successfully'
         else
-            printf "npm logging fix failed" |sed G >> ${LOGDIR}/${LOG_FILE}
+            log 'npm logging fix failed'
         fi
     else
-    printf "The command to install NodeJS ${VERSION18} on ${INSTALLDIR} may not have run successfully and the install may have failed" |sed G >> ${LOGDIR}/${LOG_FILE}
+    printf "The command to install NodeJS ${VERSION18} on ${INSTALLDIR} may not have run successfully and the install may have failed" | tee -a ${LOGDIR}/${LOG_FILE}
     fi
 
     # Establish Symbolic Links
-    ln -s "${INSTALLDIR}/node-${VERSION18}-${DISTRO18}/bin/node" /usr/local/bin/node |sed G >> ${LOGDIR}/${LOG_FILE}
-    ls -l /usr/local/bin/node |sed G >> ${LOGDIR}/${LOG_FILE}
-    ln -s "${INSTALLDIR}/node-${VERSION18}-${DISTRO18}/bin/npm" /usr/local/bin//npm |sed G >> ${LOGDIR}/${LOG_FILE}
-    ls -l /usr/local/bin/npm |sed G >> ${LOGDIR}/${LOG_FILE}
-    ln -s "${INSTALLDIR}/node-${VERSION18}-${DISTRO18}/bin/npx" /usr/local/bin/npx |sed G >> ${LOGDIR}/${LOG_FILE}
-    ls -l /usr/local/bin/npx |sed G >> ${LOGDIR}/${LOG_FILE}
+    ln -s "${FILEPATH}/bin/node" /usr/local/bin/node | tee -a ${LOGDIR}/${LOG_FILE}
+    ls -l /usr/local/bin/node | tee -a ${LOGDIR}/${LOG_FILE}
+    ln -s "${FILEPATH}/bin/npm" /usr/local/bin/npm | tee -a ${LOGDIR}/${LOG_FILE}
+    ls -l /usr/local/bin/npm | tee -a ${LOGDIR}/${LOG_FILE}
+    ln -s "${FILEPATH}/bin/npx" /usr/local/bin/npx | tee -a ${LOGDIR}/${LOG_FILE}
+    ls -l /usr/local/bin/npx | tee -a ${LOGDIR}/${LOG_FILE}
 
-    printf "Updating ownership in ${INSTALLDIR}" |sed G >> ${LOGDIR}/${LOG_FILE}
-    find "${INSTALLDIR}" -user 500 -exec chown root:root {} \; >> ${LOGDIR}/${LOG_FILE}
-
-    if [ $? = "0" ]; then
-        printf "Updating ownership of ${INSTALLDIR} was successful" |sed G >> ${LOGDIR}/${LOG_FILE}
-    else
-        printf "Updating ownership of ${INSTALLDIR} failed" |sed G >> ${LOGDIR}/${LOG_FILE}
-    fi
-
-    printf "Updating link ownership on ${INSTALLDIR}/node-${VERSION18}-${DISTRO18}/bin/npm" |sed G >> ${LOGDIR}/${LOG_FILE}
-    chown -h root:root "${INSTALLDIR}/node-${VERSION18}-${DISTRO18}/bin/npm" >> ${LOGDIR}/${LOG_FILE}
+    printf "Updating ownership in ${INSTALLDIR}" | tee -a ${LOGDIR}/${LOG_FILE}
+    find "${INSTALLDIR}" -user 500 -exec chown root:root {} \; 2>&1 | tee -a ${LOGDIR}/${LOG_FILE}
 
     if [ $? = "0" ]; then
-        printf "Updating link ownership of ${INSTALLDIR}/node-${VERSION18}-${DISTRO18}/bin/npm was successful" |sed G >> ${LOGDIR}/${LOG_FILE}
+        printf "Updating ownership of ${INSTALLDIR} was successful" | tee -a ${LOGDIR}/${LOG_FILE}
     else
-        printf "Updating link ownership of ${INSTALLDIR}/node-${VERSION18}-${DISTRO18}/bin/npm failed" |sed G >> ${LOGDIR}/${LOG_FILE}
+        printf "Updating ownership of ${INSTALLDIR} failed" | tee -a ${LOGDIR}/${LOG_FILE}
+    fi
+
+    printf "Updating link ownership on ${INSTALLDIR}/node-${VERSION18}-${DISTRO18}/bin/npm" | tee -a ${LOGDIR}/${LOG_FILE}
+    chown -h root:root "${INSTALLDIR}/node-${VERSION18}-${DISTRO18}/bin/npm" 2>&1 | tee -a ${LOGDIR}/${LOG_FILE}
+
+    if [ $? = "0" ]; then
+        printf "Updating link ownership of ${INSTALLDIR}/node-${VERSION18}-${DISTRO18}/bin/npm was successful" | tee -a ${LOGDIR}/${LOG_FILE}
+    else
+        printf "Updating link ownership of ${INSTALLDIR}/node-${VERSION18}-${DISTRO18}/bin/npm failed" | tee -a ${LOGDIR}/${LOG_FILE}
     fi
 
 
-    printf "\n" >> ${LOGDIR}/${LOG_FILE}
-    printf "\n***************Install of NodeJS ${VERSION18} under ${INSTALLDIR} has completed*********\n" >> ${LOGDIR}/${LOG_FILE}
-    printf "\n" >> ${LOGDIR}/${LOG_FILE}
+    printf "\n" | tee -a ${LOGDIR}/${LOG_FILE}
+    log "Install of NodeJS ${VERSION18} under ${INSTALLDIR} has completed"
+    printf "\n" | tee -a ${LOGDIR}/${LOG_FILE}
 
     ################################################################################
     # email log file
@@ -203,10 +222,10 @@ verify() {
     export PATH="$PATH:/usr/local/bin:/usr/local"
 
     #NODECHECK=`/usr/local/bin/node -v`
-    NODECHECK="${INSTALLDIR}/node-${VERSION18}-${DISTRO18}/bin/node -v"
+    NODECHECK='/usr/local/lib/nodejs18/node-v18.20.2-linux-x64/bin/node -v'
 
-    if [[ ${NODECHECK} = "v18.20.2" ]]; then
-        log "NodeJS ${VERSION18} ${INSTALLDIR}/node-${VERSION18}-${DISTRO18} has been successfully installed" 
+    if [[ ${NODECHECK} = 'v18.20.2' ]]; then
+        log "NodeJS ${VERSION18} has been successfully installed" 
     else
         log 'The installation failed'
         chmod 775 ${LOGDIR}/${LOG_FILE}
@@ -215,9 +234,9 @@ verify() {
     fi
 
     #NPMCHECK="/usr/local/bin/npm -v"
-    NPMCHECK="${INSTALLDIR}/node-${VERSION18}-${DISTRO18}/bin/npm -v"
+    NPMCHECK='/usr/local/lib/nodejs18/node-v18.20.2-linux-x64/bin/npm -v'
 
-    if [[ ${NPMCHECK} = "10.5.0" ]]; then
+    if [[ ${NPMCHECK} = '10.5.0' ]]; then
         log "The update of npm to VERSION18 $NPMCHECK ${INSTALLDIR}/node-${VERSION18}-${DISTRO18} was successful" 
     else
         log "The update of npm failed" 
@@ -226,13 +245,14 @@ verify() {
         exit 2
     fi
 
-    printf "\nOutput of NPM VERSION ...." >> ${LOGDIR}/${LOG_FILE}
-    log ${INSTALLDIR}/node-${VERSION18}-${DISTRO18}/bin/npm version
+    printf "\nOutput of NPM VERSION ...." | tee -a ${LOGDIR}/${LOG_FILE}
+    NPMVERSIONCHECK='/usr/local/lib/nodejs18/node-v18.20.2-linux-x64/bin/npm version'
+    ${NPMVERSIONCHECK} | tee -a ${LOGDIR}/${LOG_FILE}
     #su - buildsrdstestsvc -c "npm VERSION18" >> ${LOGDIR}/${LOG_FILE}
 
-    printf "\n" >> ${LOGDIR}/${LOG_FILE}
-    printf "\n***************Verification of NodeJS ${VERSION18} under ${INSTALLDIR}/lib/nodejs/node-${VERSION18}-${DISTRO18} has completed*********\n" >> ${LOGDIR}/${LOG_FILE}
-    printf "\n" >> ${LOGDIR}/${LOG_FILE}
+    printf "\n" ${LOGDIR}/${LOG_FILE}
+    log "Verification of NodeJS ${VERSION18} under ${INSTALLDIR}/lib/nodejs/node-${VERSION18}-${DISTRO18} has completed."
+    printf "\n" ${LOGDIR}/${LOG_FILE}
 
     ################################################################################
     # email log file
