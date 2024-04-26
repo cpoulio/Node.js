@@ -18,11 +18,16 @@ HOSTNAME="$(uname -n)"
 INSTALLDIR='/usr/local/lib/nodejs18' # NodeJS Install Directory
 VERSION18=v18.20.2
 DISTRO18=linux-x64
-LOGDIR=/tmp
-DATE=`date +%m%d%Y`
-FILEPATH="${INSTALLDIR}"/node-"${VERSION18}"-"${DISTRO18}"
-echo ${FILEPATH}
+NODEJSFILE="node-${VERSION18}-${DISTRO18}"
+FILEPATH="${INSTALLDIR}/${NODEJSFILE}/bin"
+LOGDIR="/tmp"
+DATE=$(date '+%Y-%m-%d %H:%M:%S')
 
+###################################################################################################################################################################
+## Check Variables ##
+echo ${NODEJSFILE}
+echo ${FILEPATH}
+echo ${DATE}
 echo "MODE=${MODE}"
 printf "MODE=%s\n" ${MODE}
 
@@ -45,38 +50,36 @@ done
 
 # Common Functions
 
-# Action_status is Indicate successful completion EXTRA
-ACTION_STATUS=0
+
 
 log() {
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" | tee -a ${LOGDIR}/${LOG_FILE}
+    echo "${DATE} - $1" | tee -a ${LOGDIR}/${LOG_FILE}
 }
 
 send_email() {
     # Assumes $EMAIL_SUBJECT and $LOG_FILE_PATH are set appropriately before calling this function
     echo 'Sending email notification...'
-    cat ${LOGDIR}/${LOG_FILE}| mailx -s "$EMAIL_SUBJECT" "$EMAIL_RECIPIENT"
+    cat ${LOGDIR}/${LOG_FILE} | mailx -s "$EMAIL_SUBJECT" "$EMAIL_RECIPIENT"
 }
 
+# Action_status is Indicate successful completion EXTRA
+ACTION_STATUS=0
 ####################################################################################################################################
 # Function to install NodeJS18
 
 install() {
     log 'Starting Install Function'
-    NODEJSFILE=$(find . -maxdepth 1 -name '*.tar.xz' -print -quit)
-    FILENAME=$(basename -- "${NODEJSFILE}")
-    LOG_FILE="${FILENAME}-install.log"
     ACTION_PERFORMED='install'
-    EMAIL_SUBJECT="${HOSTNAME}: ${LOGDIR}/${LOG_FILE} ${ACTION_PERFORMED} action completed successfully on $(date)."
-    
-    
+    LOG_FILE="node-${VERSION18}-${DISTRO18}-${ACTION_PERFORMED}.log"
+    EMAIL_SUBJECT="${HOSTNAME}: ${LOGDIR}/${LOG_FILE} ${ACTION_PERFORMED} action completed successfully on ${DATE}."
+
     # Check if the file was found
-    if [ -z "${NODEJSFILE}" ]; then
+    if [ -z "${NODEJSFILE}.tar.xz" ]; then
         echo 'NodeJS TAR not found.'
-        exit 1
+        exit
     fi
-    
-    
+
+    echo ${LOGDIR}/${LOG_FILE}
     printf "\n" > ${LOGDIR}/${LOG_FILE}
 
     yum install -y openssl-devel bzip2-devel libicu-devel gcc-c++ make 2>&1 | tee -a ${LOGDIR}/${LOG_FILE}
@@ -108,23 +111,22 @@ install() {
 
     #Refresh .bash_prof
     . ~/.bash_profile > /dev/null
-    pwd
-    ls -la
-    log "Extracting "${NODEJSFILE}""
+    log "Extracting ${NODEJSFILE}"
     mkdir -p ${INSTALLDIR}
-    tar -xvJf "${deploy_dir}/${NODEJSFILE}" -C "${INSTALLDIR}" 2>&1 | tee -a ${LOGDIR}/${LOG_FILE}
+    tar -xvJf "${deploy_dir}/${NODEJSFILE}.tar.xz -C ${INSTALLDIR}" 2>&1 | tee -a ${LOGDIR}/${LOG_FILE}
+    #tar -xvJf "./${NODEJSFILE}.tar.xz -C ${INSTALLDIR}" 2>&1 | tee -a ${LOGDIR}/${LOG_FILE} ### For Local Testing ##
     if [ $? -ne 0 ]; then
-        log "Failed Extracting "${NODEJSFILE}""
-        exit 2
+        log "Failed Extracting ${NODEJSFILE}"
+        exit 1
     else
-        log "Successfully Extracting "${NODEJSFILE}""
+        log "Successfully Extracting ${NODEJSFILE}"
     fi
     chmod 755 -R ${INSTALLDIR}
 
     if [ $? = "0" ]; then
-        log "The command to extract NodeJS ${VERSION18} on ${INSTALLDIR} ran successfully"
+        log "The command to extract NodeJS ${VERSION18} to ${INSTALLDIR} ran successfully"
         log "Fixing npm logging issue"
-        cd "${INSTALLDIR}/node-${VERSION18}-${DISTRO18}/lib/node_modules/npm/node_modules/npmlog/lib"
+        cd "${INSTALLDIR}/${NODEJSFILE}/lib/node_modules/npm/node_modules/npmlog/lib"
         cp log.js log.js.org
         sed -i -e 's|log.progressEnabled|//log.progressEnabled|' log.js
         if grep "//log.progressEnabled" log.js > /dev/null; then
@@ -137,11 +139,11 @@ install() {
     fi
 
     # Establish Symbolic Links
-    ln -s "${FILEPATH}/bin/node" /usr/local/bin/node | tee -a ${LOGDIR}/${LOG_FILE}
+    ln -s "${FILEPATH}/node" /usr/local/bin/node | tee -a ${LOGDIR}/${LOG_FILE}
     ls -l /usr/local/bin/node | tee -a ${LOGDIR}/${LOG_FILE}
-    ln -s "${FILEPATH}/bin/npm" /usr/local/bin/npm | tee -a ${LOGDIR}/${LOG_FILE}
+    ln -s "${FILEPATH}/npm" /usr/local/bin/npm | tee -a ${LOGDIR}/${LOG_FILE}
     ls -l /usr/local/bin/npm | tee -a ${LOGDIR}/${LOG_FILE}
-    ln -s "${FILEPATH}/bin/npx" /usr/local/bin/npx | tee -a ${LOGDIR}/${LOG_FILE}
+    ln -s "${FILEPATH}/npx" /usr/local/bin/npx | tee -a ${LOGDIR}/${LOG_FILE}
     ls -l /usr/local/bin/npx | tee -a ${LOGDIR}/${LOG_FILE}
 
     printf "Updating ownership in ${INSTALLDIR}" | tee -a ${LOGDIR}/${LOG_FILE}
@@ -153,13 +155,13 @@ install() {
         printf "Updating ownership of ${INSTALLDIR} failed" | tee -a ${LOGDIR}/${LOG_FILE}
     fi
 
-    printf "Updating link ownership on ${INSTALLDIR}/node-${VERSION18}-${DISTRO18}/bin/npm" | tee -a ${LOGDIR}/${LOG_FILE}
-    chown -h root:root "${INSTALLDIR}/node-${VERSION18}-${DISTRO18}/bin/npm" 2>&1 | tee -a ${LOGDIR}/${LOG_FILE}
+    printf "Updating link ownership on ${FILEPATH}/npm" | tee -a ${LOGDIR}/${LOG_FILE}
+    chown -h root:root "${FILEPATH}/npm" 2>&1 | tee -a ${LOGDIR}/${LOG_FILE}
 
     if [ $? = "0" ]; then
-        printf "Updating link ownership of ${INSTALLDIR}/node-${VERSION18}-${DISTRO18}/bin/npm was successful" | tee -a ${LOGDIR}/${LOG_FILE}
+        printf "Updating link ownership of ${FILEPATH}/npm was successful" | tee -a ${LOGDIR}/${LOG_FILE}
     else
-        printf "Updating link ownership of ${INSTALLDIR}/node-${VERSION18}-${DISTRO18}/bin/npm failed" | tee -a ${LOGDIR}/${LOG_FILE}
+        printf "Updating link ownership of ${FILEPATH}/npm failed" | tee -a ${LOGDIR}/${LOG_FILE}
     fi
 
 
@@ -179,9 +181,10 @@ install() {
 
 uninstall() {
     log 'Starting Uninstall Function'
-    LOG_FILE='/NodeJS-uninstall.log'
     ACTION_PERFORMED='uninstall'
-    EMAIL_SUBJECT="${HOSTNAME}: ${LOGDIR}/${LOG_FILE} ${ACTION_PERFORMED} action completed successfully on $(date)."
+    LOG_FILE="node-${VERSION18}-${DISTRO18}-${ACTION_PERFORMED}.log"
+    EMAIL_SUBJECT="${HOSTNAME}: ${LOGDIR}/${LOG_FILE} ${ACTION_PERFORMED} action completed successfully on ${DATE}."
+    echo ${LOGDIR}/${LOG_FILE}
     printf "\n" > ${LOGDIR}/${LOG_FILE}
 
     #Remove NodeJS
@@ -213,19 +216,20 @@ uninstall() {
 
 verify() {
     log 'Starting Verify Function'
-    LOG_FILE='/NodeJS-verify.log'
     ACTION_PERFORMED='verify'
-    EMAIL_SUBJECT="${HOSTNAME}: ${LOGDIR}/${LOG_FILE} ${ACTION_PERFORMED} action completed successfully on $(date)."
+    LOG_FILE="node-${VERSION18}-${DISTRO18}-${ACTION_PERFORMED}.log"
+    EMAIL_SUBJECT="${HOSTNAME}: ${LOGDIR}/${LOG_FILE} ${ACTION_PERFORMED} action completed successfully on ${DATE}."
+    echo ${LOGDIR}/${LOG_FILE}
     printf "\n" > ${LOGDIR}/${LOG_FILE}
 
     log "Verifying the install of NodeJS ${VERSION18}"
     export PATH="$PATH:/usr/local/bin:/usr/local"
 
     #NODECHECK=`/usr/local/bin/node -v`
-    NODECHECK='/usr/local/lib/nodejs18/node-v18.20.2-linux-x64/bin/node -v'
+    NODECHECK=$(${FILEPATH}/node -v)
 
     if [[ ${NODECHECK} = 'v18.20.2' ]]; then
-        log "NodeJS ${VERSION18} has been successfully installed" 
+        log "NodeJS ${VERSION18} has been successfully installed"
     else
         log 'The installation failed'
         chmod 775 ${LOGDIR}/${LOG_FILE}
@@ -234,24 +238,24 @@ verify() {
     fi
 
     #NPMCHECK="/usr/local/bin/npm -v"
-    NPMCHECK='/usr/local/lib/nodejs18/node-v18.20.2-linux-x64/bin/npm -v'
+    NPMCHECK=$(${FILEPATH}/npm -v)
 
     if [[ ${NPMCHECK} = '10.5.0' ]]; then
-        log "The update of npm to VERSION18 $NPMCHECK ${INSTALLDIR}/node-${VERSION18}-${DISTRO18} was successful" 
+        log "The update of npm to VERSION18 $NPMCHECK ${FILEPATH} was successful"
     else
-        log "The update of npm failed" 
+        log "The update of npm failed"
         chmod 775 ${LOGDIR}/${LOG_FILE}
         send_email
         exit 2
     fi
 
     printf "\nOutput of NPM VERSION ...." | tee -a ${LOGDIR}/${LOG_FILE}
-    NPMVERSIONCHECK='/usr/local/lib/nodejs18/node-v18.20.2-linux-x64/bin/npm version'
-    ${NPMVERSIONCHECK} | tee -a ${LOGDIR}/${LOG_FILE}
+    NPMVERSIONCHECK=$(${FILEPATH}/npm version)
+    echo ${NPMVERSIONCHECK} | tee -a ${LOGDIR}/${LOG_FILE}
     #su - buildsrdstestsvc -c "npm VERSION18" >> ${LOGDIR}/${LOG_FILE}
 
     printf "\n" ${LOGDIR}/${LOG_FILE}
-    log "Verification of NodeJS ${VERSION18} under ${INSTALLDIR}/lib/nodejs/node-${VERSION18}-${DISTRO18} has completed."
+    log "Verification of NodeJS ${VERSION18} under ${FILEPATH} has completed."
     printf "\n" ${LOGDIR}/${LOG_FILE}
 
     ################################################################################
