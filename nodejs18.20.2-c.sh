@@ -68,6 +68,7 @@ install() {
 
     # Check if the NodeJS tar file was found
     if [ ! -f "${deploy_dir}/${NODEJSFILE}.tar.xz" ]; then
+    #if [ ! -f "./${NODEJSFILE}.tar.xz" ]; then #**Local Testing**#
         log "NodeJS TAR not found."
         exit 1
     fi
@@ -85,6 +86,7 @@ install() {
     echo "Extracting ${NODEJSFILE}..."
     mkdir -p ${INSTALLDIR}
     tar -xvJf "${deploy_dir}/${NODEJSFILE}.tar.xz" -C ${INSTALLDIR} 2>&1 | tee -a ${LOGDIR}/${LOG_FILE}
+    #tar -xvJf "./${NODEJSFILE}.tar.xz" -C ${INSTALLDIR} 2>&1 | tee -a ${LOGDIR}/${LOG_FILE}  #**Local Testing**#
     if [ $? -ne 0 ]; then
         log "Failed to extract ${NODEJSFILE}."
         exit 1
