@@ -15,9 +15,9 @@ EMAIL_RECIPIENT=christopher.g.pouliot@irs.gov
 HOSTNAME="$(uname -n)"
 INSTALLDIR='/usr/local/lib/nodejs18'
 NPM10='10.5.0'
-VERSION18=v18.20.2
+VERSION18='18.20.2'
 DISTRO18=linux-x64
-NODEJSFILE="node-${VERSION18}-${DISTRO18}"
+NODEJSFILE="node-v${VERSION18}-${DISTRO18}"
 FILEPATH="${INSTALLDIR}/${NODEJSFILE}/bin"
 LOGDIR="/tmp"
 DATE=$(date '+%Y-%m-%d %H:%M:%S')
@@ -63,7 +63,7 @@ ACTION_STATUS=0 # Action_status is Indicate successful completion EXTRA
 install() {
     log 'Starting Install and Verify Function'
     ACTION_PERFORMED='install_verify'
-    LOG_FILE="node-${VERSION18}-${DISTRO18}-${ACTION_PERFORMED}.log"
+    LOG_FILE="node-v${VERSION18}-${DISTRO18}-${ACTION_PERFORMED}.log"
     EMAIL_SUBJECT="${HOSTNAME}: ${LOGDIR}/${LOG_FILE} ${ACTION_PERFORMED} action completed successfully on ${DATE}."
 
     # Check if the NodeJS tar file was found
@@ -109,7 +109,7 @@ install() {
     echo "Updating .bash_profile..."
     sed -i -e 's|^PATH=\$PATH:\$HOME/bin|#PATH=\$PATH:\$HOME/bin|' ~/.bash_profile
     echo "" >> ~/.bash_profile
-    echo "export PATH=\${INSTALLDIR}/node-\${VERSION18}-\${DISTRO18}/bin:\$PATH" >> ~/.bash_profile
+    echo "export PATH=\${INSTALLDIR}/node-\v${VERSION18}-\${DISTRO18}/bin:\$PATH" >> ~/.bash_profile
     echo ".bash_profile was updated!"
     . ~/.bash_profile
 
@@ -142,12 +142,12 @@ install() {
     fi
 
     # Verify installation
-    log "Verifying the install of NodeJS ${VERSION18}"
+    log "Verifying the install of NodeJS v${VERSION18}"
     export PATH="$PATH:/usr/local/bin:/usr/local"
 
     NODECHECK=$(${FILEPATH}/node -v)
     if [ "${NODECHECK}" = "${VERSION18}" ]; then
-        log "NodeJS ${VERSION18} has been successfully installed"
+        log "NodeJS v${VERSION18} has been successfully installed"
     else
         log 'NodeJS installation failed'
         exit 2
@@ -169,7 +169,7 @@ install() {
 uninstall() {
     log 'Starting Uninstall Function'
     ACTION_PERFORMED='uninstall'
-    LOG_FILE="node-${VERSION18}-${DISTRO18}-${ACTION_PERFORMED}.log"
+    LOG_FILE="node-v${VERSION18}-${DISTRO18}-${ACTION_PERFORMED}.log"
     EMAIL_SUBJECT="${HOSTNAME}: ${LOGDIR}/${LOG_FILE} ${ACTION_PERFORMED} action completed successfully on ${DATE}."
     echo ${LOGDIR}/${LOG_FILE}
     printf "\n" > ${LOGDIR}/${LOG_FILE}
@@ -184,7 +184,7 @@ uninstall() {
         sed -i 's/#PATH=/PATH=/' ~/.bash_profile
         sed -i '/VERSION18=v18.20.2/d' ~/.bash_profile
         sed -i '/DISTRO18=linux-x64/d' ~/.bash_profile
-        sed -i '/export PATH=${INSTALLDIR}\/lib\/nodejs18\/node-${VERSION18}-${DISTRO18}\/bin:$PATH/d' ~/.bash_profile
+        sed -i '/export PATH=${INSTALLDIR}\/lib\/nodejs18\/node-v${VERSION18}-${DISTRO18}\/bin:$PATH/d' ~/.bash_profile
         sed -i '/export PATH=$PATH:$HOME\/bin/d' ~/.bash_profile
         log 'NodeJS removed cleanly.'
     else
