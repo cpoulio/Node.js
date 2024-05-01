@@ -1,32 +1,34 @@
 #!/bin/bash
 
 # Description:
-# This script automates the installation of NodeJS 18 and verification in one step.
-# It dynamically sets the installation log file based on the detected NodeJS18 Quickstart jar
+# This script automates the installation of ${SOFTWARENAME} 18 and verification in one step.
+# It dynamically sets the installation log file based on the detected ${SOFTWARENAME}18 Quickstart jar
 # and performs cleanup during uninstallation.
-
+#
 # Usage:
-# To install and verify NodeJS18, place the NodeJS18.tar.xz and the license properties file in the same directory as this script and run: ./NodeJS.sh install
-# To uninstall NodeJS18, simply run: ./NodeJS.sh uninstall
+# To install and verify ${SOFTWARENAME}18, place the ${SOFTWARENAME}18.tar.xz and the license properties file in the same directory as this script and run: ./${SOFTWARENAME}.sh install
+# To uninstall ${SOFTWARENAME}18, simply run: ./${SOFTWARENAME}.sh uninstall
 #"Deployment Directory=${deploy_dir}" is VERY important. This is for Ansible and has to represent the directory that has the scripts and binaries.
 
 ## Common Variables ############################################################################################################################################################
-echo "Deployment Directory=${deploy_dir}"
+
+#deploy_dir='.' # Comment out when deploying with Ansible.
 EMAIL_RECIPIENT='christopher.g.pouliot@irs.gov'
 HOSTNAME="$(uname -n)"
+SOFTWARENAME='NodeJS'
 INSTALLDIR='/usr/local/lib/nodejs18'
+LOGDIR="/tmp"
 NPM_VERSION='10.5.0'
 VERSION18='18.20.2'
 NODE_VERSION="v${VERSION18}"
 DISTRO18='linux-x64'
-NODEJSFILE="node-"${NODE_VERSION}"-${DISTRO18}"
+NODEJSFILE="node-${NODE_VERSION}-${DISTRO18}"
 FILEPATH="${INSTALLDIR}/${NODEJSFILE}/bin"
 YUM_PACKAGES="openssl-devel bzip2-devel libicu-devel gcc-c++ make"
-LOGDIR="/tmp"
 DATE="$(date '+%Y-%m-%d %H:%M:%S')"
 
 ## Check Variables ############################################################################################################################################################
-
+echo "Deployment Directory=${deploy_dir}"
 echo "${NODEJSFILE}"
 echo "${FILEPATH}"
 echo "${NODE_VERSION}"
@@ -74,18 +76,18 @@ install_YUM_packages() {
 
 extract_nodejs() {
 
-    # Check if the NodeJS tar file was found
+    # Check if the ${SOFTWARENAME} tar file was found
     if [ ! -f "${deploy_dir}/${NODEJSFILE}.tar.xz" ]; then
-     #if [ ! -f "./${NODEJSFILE}.tar.xz" ]; then #**Local Testing**#
-        log "NodeJS TAR not found."
+        log "${SOFTWARENAME} TAR not found."
         exit 1
+    else
+        log "TAR Found ${NODEJSFILE}.tar.xz."
     fi
 
-    #  Extract NodeJS
-    echo "Extracting ${NODEJSFILE}..."
+    #  Extract ${SOFTWARENAME}
+    log "Extracting ${NODEJSFILE}..."
     mkdir -p ${INSTALLDIR}
-    #tar -xvJf "./${NODEJSFILE}.tar.xz" -C ${INSTALLDIR} 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"  #**Local Testing**#
-    tar -xvJf "${deploy_dir}/${NODEJSFILE}.tar.xz" -C ${INSTALLDIR} 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
+    tar -xJf "${deploy_dir}/${NODEJSFILE}.tar.xz" -C ${INSTALLDIR} 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
     if [ $? -ne 0 ]; then
         log "Failed to extract ${NODEJSFILE}."
         exit 1
@@ -104,8 +106,6 @@ extract_nodejs() {
     fi
 }
 
-ACTION_STATUS=0 # Action_status is Indicate successful completion EXTRA!
-
 ## Combined install and verify function ############################################################################################################################################################
 
 install() {
@@ -116,7 +116,7 @@ install() {
 
     install_YUM_packages # Installing YUM packages function.
 
-    extract_nodejs # Check if the NodeJS tar file was found and Extract NodeJS function.
+    extract_nodejs # Check if the ${SOFTWARENAME} tar file was found and Extract ${SOFTWARENAME} function.
 
     # Update bash_profile
     echo "Updating .bash_profile..."
@@ -153,15 +153,15 @@ install() {
     fi
 
     # Verify installation
-    log "Verifying the install of NodeJS ${NODE_VERSION}"
+    log "Verifying the install of ${SOFTWARENAME} ${NODE_VERSION}"
     export PATH="$PATH:/usr/local/bin:/usr/local"
     echo "${NODE_VERSION}"
 
     NODECHECK=$(${FILEPATH}/node -v)
     if [[ "${NODECHECK}" = "${NODE_VERSION}" ]]; then
-        log "NodeJS ${NODE_VERSION} has been successfully installed"
+        log "${SOFTWARENAME} ${NODE_VERSION} has been successfully installed"
     else
-        log 'NodeJS installation failed'
+        log '${SOFTWARENAME} installation failed'
         exit 2
     fi
 
@@ -179,31 +179,28 @@ install() {
 ## Uninstall ############################################################################################################################################################
 
 uninstall() {
-    log 'Starting Uninstall Function'
+    log "Starting Uninstall ${SOFTWARENAME} Function"
     ACTION_PERFORMED='uninstall'
     LOG_FILE="node-${NODE_VERSION}-${DISTRO18}-${ACTION_PERFORMED}-${DATE}.log"
     EMAIL_SUBJECT="${HOSTNAME}: "${LOGDIR}/${LOG_FILE}" ${ACTION_PERFORMED} action completed successfully on ${DATE}."
-    echo "${LOGDIR}/${LOG_FILE}"
-    printf "\n" > "${LOGDIR}/${LOG_FILE}"
 
-    #Remove NodeJS
     if [ -d ${INSTALLDIR} ]; then
-        rm -rf ${INSTALLDIR} && log "NodeJS ${INSTALLDIR} file removed." || log "Failed to remove ${INSTALLDIR}."
-        rm -f /usr/local/bin/npx  && log 'NodeJS npx file removed.' || log 'Failed to remove npx.'
-        rm -f /usr/local/bin/npm  && log 'NodeJS npm file removed.' || log 'Failed to remove npm.'
-        rm -f /usr/local/bin/node && log 'NodeJS node file removed.' || log 'Failed to remove node.'
+        rm -rf ${INSTALLDIR} && log "${SOFTWARENAME} ${INSTALLDIR} file removed." || log "Failed to remove ${INSTALLDIR}."
+        rm -f /usr/local/bin/npx  && log "${SOFTWARENAME} npx file removed." || log 'Failed to remove npx.'
+        rm -f /usr/local/bin/npm  && log "${SOFTWARENAME} npm file removed." || log 'Failed to remove npm.'
+        rm -f /usr/local/bin/node && log "${SOFTWARENAME} node file removed." || log 'Failed to remove node.'
         cp -p ~/.bash_profile ~/.bash_profile.bak.${DATE}
         sed -i 's/#PATH=/PATH=/' ~/.bash_profile
         sed -i '/VERSION18=v18.20.2/d' ~/.bash_profile
         sed -i '/DISTRO18=linux-x64/d' ~/.bash_profile
         sed -i '/export PATH=${INSTALLDIR}\/lib\/nodejs18\/node-${NODE_VERSION}-${DISTRO18}\/bin:$PATH/d' ~/.bash_profile
         sed -i '/export PATH=$PATH:$HOME\/bin/d' ~/.bash_profile
-        log 'NodeJS removed cleanly.'
+        log '${SOFTWARENAME} removed cleanly.'
     else
-        log "NodeJS does not exist under ${INSTALLDIR}"
+        log "${SOFTWARENAME} does not exist under ${INSTALLDIR}"
     fi
 
-    log "Installation and verification completed."
+    log "Uninstall completed."
     send_email
 }
 ## Main Execution Logic ############################################################################################################################################################
