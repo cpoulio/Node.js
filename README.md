@@ -25,34 +25,39 @@ This Bash script automates the installation and verification of NodeJS 18 on a L
    ./NodeJS.sh install
 
 ## Uninstallation
-To uninstall NodeJS 18, run the script with the following command: ./NodeJS.sh uninstall
+To uninstall NodeJS 18, run the script with the following command:
+./NodeJS.sh uninstall
 
-# Configuration
-## Deployment Directory
-Deployment Directory=deploy_dir This is the default Ansible directory.
+## Configuration
 
-# Configuration Variables
-EMAIL_RECIPIENT: The email address to which notifications will be sent.
-INSTALLDIR: Directory where NodeJS will be installed.
-LOGDIR: Directory where logs will be stored.
-NODE_VERSION: The specific version of NodeJS to be installed.
-YUM_PACKAGES: A list of required YUM packages that the script will install.
-# Functions
-## install()
-Handles the installation and verification of NodeJS.
-Sets up necessary environment variables and paths.
-Creates symbolic links for node, npm, and npx.
-Updates the .bash_profile to include the NodeJS path.
-Sends an email upon successful installation.
-## uninstall()
-Removes installed NodeJS and associated files.
-Reverts changes made to .bash_profile.
-Sends an email upon successful uninstallation.
-# Execution Logic
+### Deployment Directory
+- **Deployment Directory (`deploy_dir`)**: This is the default directory used by Ansible.
+
+### Configuration Variables
+- **EMAIL_RECIPIENT**: The email address to which notifications will be sent.
+- **INSTALLDIR**: Directory where NodeJS will be installed.
+- **LOGDIR**: Directory where logs will be stored.
+- **NODE_VERSION**: The specific version of NodeJS to be installed.
+- **YUM_PACKAGES**: A list of required YUM packages that the script will install.
+
+## Functions
+
+### `install()`
+- Handles the installation and verification of NodeJS.
+- Sets up necessary environment variables and paths.
+- Creates symbolic links for node, npm, and npx.
+- Updates the `.bash_profile` to include the NodeJS path.
+- Sends an email upon successful installation.
+
+### `uninstall()`
+- Removes installed NodeJS and associated files.
+- Reverts changes made to `.bash_profile`.
+- Sends an email upon successful uninstallation.
+
+## Execution Logic
 The script checks the mode (install or uninstall) based on command-line arguments and executes the corresponding function. It exits with an error if an invalid mode is specified.
 
-## Overide MODE logic for local testing .sh script without setup.sh
-## Check for command-line arguments for MODE
+### Override MODE Logic for Local Testing
 for ARG in "$@"
 do
     case $ARG in
