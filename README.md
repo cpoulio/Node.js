@@ -66,8 +66,9 @@
 - `install`: Orchestrates the complete installation and verification process.
 - `uninstall`: Handles the uninstallation process and system cleanup.
 
-## Execution Logic:
-### Command-Line Arguments Check:
+# Execution Logic:
+## Command-Line Arguments Check:
+### Explanations
 1. **Header:**
    - `## Check for command-line arguments for MODE (VERY IMPORTANT)`: This line creates a header in your markdown document, emphasizing the importance of this script section.
 2. **Script Purpose:**
@@ -89,9 +90,8 @@
      esac
    done
 ```
-### Main Execution Logic
-## Explanations
-
+# Main Execution Logic
+### Explanations
 - **`case ${MODE} in`**: This statement evaluates the `MODE` variable.
     - **`install`**: Executes the `install` function if `MODE` is set to 'install'. This function should encompass all tasks necessary to install the software, such as setting up directories, installing dependencies, and configuring settings.
     - **`uninstall`**: Executes the `uninstall` function if `MODE` is set to 'uninstall'. This function is responsible for removing installed components, cleaning up directories, and restoring settings to their original state.
@@ -115,17 +115,13 @@ case ${MODE} in
         ;;
 esac
 ```
-## Mode Check:
-- Script checks if it was called with 'install' or 'uninstall' arguments.
-### Check Variables
+## Check Variables
 This script section outputs the values of key variables, useful for debugging and ensuring correct setup:
-
 - `echo "${NODEJSFILE}"`: Displays the filename for the NodeJS installation.
 - `echo "${FILEPATH}"`: Shows the path where NodeJS binaries are stored.
 - `echo "${NODE_VERSION}"`: Prints the currently set NodeJS version.
 - `echo "DATE=${DATE}"` and `printf "DATE=%s\n" ${DATE}`: Both commands output the current date and time, useful for logging and timestamping operations in the script.
 - *These commands help verify that all necessary variables are properly initialized before the script performs more complex tasks.
-
 ## Additional Notes
 - The script assumes mailx is configured for sending emails.
 - Proper error handling is in place to exit the installation or uninstallation process upon encountering any significant failure, ensuring robustness.
