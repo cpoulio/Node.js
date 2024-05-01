@@ -1,4 +1,4 @@
-# Script Documentation: NodeJS.sh
+# NodeJS.sh ReadMe!
 ## How to Install
 
 - Place the NodeJS18.tar.xz and the license file in the script's directory.
