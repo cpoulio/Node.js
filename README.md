@@ -1,4 +1,6 @@
 # NodeJS.sh ReadMe!
+## Nexus Tag:
+- Node.JS-v18.20.2
 ## How to Install
 
 - Place the NodeJS18.tar.xz and the license file in the script's directory.
