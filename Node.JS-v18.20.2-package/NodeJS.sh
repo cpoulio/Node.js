@@ -13,16 +13,16 @@
 ## Common Variables ############################################################################################################################################################
 
 #deploy_dir='.' # Comment out when deploying with Ansible.
+SOFTWARENAME='NodeJS'
 EMAIL_RECIPIENT='christopher.g.pouliot@irs.gov'
 HOSTNAME="$(uname -n)"
-SOFTWARENAME='NodeJS'
 INSTALLDIR='/usr/local/lib/nodejs18'
 LOGDIR="/tmp"
 NPM_VERSION='10.5.0'
 VERSION18='18.20.2'
 NODE_VERSION="v${VERSION18}"
-DISTRO18='linux-x64'
-NODEJSFILE="node-${NODE_VERSION}-${DISTRO18}"
+LINUX_DISTRO='linux-x64'
+NODEJSFILE="node-${NODE_VERSION}-${LINUX_DISTRO}"
 FILEPATH="${INSTALLDIR}/${NODEJSFILE}/bin"
 YUM_PACKAGES="openssl-devel bzip2-devel libicu-devel gcc-c++ make"
 DATE="$(date '+%Y-%m-%d %H:%M:%S')"
@@ -93,12 +93,12 @@ extract_nodejs() {
         exit 1
     else
         log "Successfully extracted ${NODEJSFILE}."
-        # Fix npm logging issue
-        log "Fixing npm logging issue..."
+        
+        log 'Fixing npm logging issue...'
         cd "${INSTALLDIR}/${NODEJSFILE}/lib/node_modules/npm/node_modules/npmlog/lib"
-        cp log.js log.js.org
-        sed -i -e 's|log.progressEnabled|//log.progressEnabled|' log.js
-        if grep "//log.progressEnabled" log.js > /dev/null; then
+        cp 'log.js' 'log.js.org'
+        sed -i -e 's|log.progressEnabled|//log.progressEnabled|' 'log.js'
+        if grep '//log.progressEnabled' log.js > /dev/null; then
             log 'npm logging fix applied successfully'
         else
             log 'npm logging fix failed'
@@ -111,7 +111,7 @@ extract_nodejs() {
 install() {
     log 'Starting Install and Verify Function'
     ACTION_PERFORMED='install and verify'
-    LOG_FILE="node-${NODE_VERSION}-${DISTRO18}-${ACTION_PERFORMED}-${DATE}.log"
+    LOG_FILE="node-${NODE_VERSION}-${LINUX_DISTRO}-${ACTION_PERFORMED}-${DATE}.log"
     EMAIL_SUBJECT="${HOSTNAME}: ${NODEJSFILE} ${ACTION_PERFORMED} action completed successfully on ${DATE}."
 
     install_YUM_packages # Installing YUM packages function.
@@ -122,7 +122,7 @@ install() {
     echo "Updating .bash_profile..."
     sed -i -e 's|^PATH=\$PATH:\$HOME/bin|#PATH=\$PATH:\$HOME/bin|' ~/.bash_profile
     echo "" >> ~/.bash_profile
-    echo "export PATH=\${INSTALLDIR}/node-${NODE_VERSION}-\${DISTRO18}/bin:\$PATH" >> ~/.bash_profile # This is where it sets Version with echo
+    echo "export PATH=${INSTALLDIR}/node-${NODE_VERSION}-${LINUX_DISTRO}/bin:\$PATH" >> ~/.bash_profile # This is where it sets Version with echo
     echo ".bash_profile was updated!"
     . ~/.bash_profile
 
@@ -153,9 +153,9 @@ install() {
     fi
 
     # Verify installation
-    log "Verifying the install of ${SOFTWARENAME} ${NODE_VERSION}"
-    export PATH="$PATH:/usr/local/bin:/usr/local"
-    echo "${NODE_VERSION}"
+    log "Verifying the install of ${SOFTWARENAME} at version ${NODE_VERSION}"
+    export PATH="$PATH:/usr/local/bin:/usr/local" # Ensure local bin directores are in the PATH
+    echo "Node Version Installed: ${NODE_VERSION}"
 
     NODECHECK=$(${FILEPATH}/node -v)
     if [[ "${NODECHECK}" = "${NODE_VERSION}" ]]; then
@@ -181,21 +181,22 @@ install() {
 uninstall() {
     log "Starting Uninstall ${SOFTWARENAME} Function"
     ACTION_PERFORMED='uninstall'
-    LOG_FILE="node-${NODE_VERSION}-${DISTRO18}-${ACTION_PERFORMED}-${DATE}.log"
+    LOG_FILE="node-${NODE_VERSION}-${LINUX_DISTRO}-${ACTION_PERFORMED}-${DATE}.log"
     EMAIL_SUBJECT="${HOSTNAME}: "${LOGDIR}/${LOG_FILE}" ${ACTION_PERFORMED} action completed successfully on ${DATE}."
 
     if [ -d ${INSTALLDIR} ]; then
-        rm -rf ${INSTALLDIR} && log "${SOFTWARENAME} ${INSTALLDIR} file removed." || log "Failed to remove ${INSTALLDIR}."
+        rm -rf "${INSTALLDIR}" && log "${SOFTWARENAME} ${INSTALLDIR} file removed." || log "Failed to remove ${INSTALLDIR}."
         rm -f /usr/local/bin/npx  && log "${SOFTWARENAME} npx file removed." || log 'Failed to remove npx.'
         rm -f /usr/local/bin/npm  && log "${SOFTWARENAME} npm file removed." || log 'Failed to remove npm.'
         rm -f /usr/local/bin/node && log "${SOFTWARENAME} node file removed." || log 'Failed to remove node.'
-        cp -p ~/.bash_profile ~/.bash_profile.bak.${DATE}
+        cp -p ~/.bash_profile ~/.bash_profile.bak | tee -a "${LOGDIR}/${LOG_FILE}"
+        log 'bash_profile backed up'
         sed -i 's/#PATH=/PATH=/' ~/.bash_profile
-        sed -i '/VERSION18=v18.20.2/d' ~/.bash_profile
-        sed -i '/DISTRO18=linux-x64/d' ~/.bash_profile
-        sed -i '/export PATH=${INSTALLDIR}\/lib\/nodejs18\/node-${NODE_VERSION}-${DISTRO18}\/bin:$PATH/d' ~/.bash_profile
-        sed -i '/export PATH=$PATH:$HOME\/bin/d' ~/.bash_profile
-        log '${SOFTWARENAME} removed cleanly.'
+        sed -i "/node-${NODE_VERSION}-${LINUX_DISTRO}/d" ~/.bash_profile
+        sed -i "/LINUX_DISTRO=${LINUX_DISTRO}/d" ~/.bash_profile
+        sed -i "\|export PATH=${INSTALLDIR}/node-${NODE_VERSION}-${LINUX_DISTRO}/bin:\$PATH|d" ~/.bash_profile
+        sed -i "\|export PATH=\$PATH:\$HOME/bin|d" ~/.bash_profile
+        log "${SOFTWARENAME} removed cleanly."
     else
         log "${SOFTWARENAME} does not exist under ${INSTALLDIR}"
     fi
