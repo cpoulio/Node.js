@@ -58,8 +58,8 @@ log() {
 }
 
 send_email() {
-    # Assumes $EMAIL_SUBJECT and $LOG_FILE_PATH are set appropriately before calling this function
     echo 'Sending email notification...'
+    EMAIL_SUBJECT="${HOSTNAME}: ${LOG_FILE} successfully."
     cat "${LOGDIR}/${LOG_FILE}" | mailx -s "$EMAIL_SUBJECT" "$EMAIL_RECIPIENT"
 }
 
@@ -110,9 +110,8 @@ extract_nodejs() {
 
 install() {
     log 'Starting Install and Verify Function'
-    ACTION_PERFORMED='install and verify'
+    ACTION_PERFORMED='Install and Verify'
     LOG_FILE="node-${NODE_VERSION}-${LINUX_DISTRO}-${ACTION_PERFORMED}-${DATE}.log"
-    EMAIL_SUBJECT="${HOSTNAME}: ${NODEJSFILE} ${ACTION_PERFORMED} action completed successfully on ${DATE}."
 
     install_YUM_packages # Installing YUM packages function.
 
@@ -180,9 +179,8 @@ install() {
 
 uninstall() {
     log "Starting Uninstall ${SOFTWARENAME} Function"
-    ACTION_PERFORMED='uninstall'
+    ACTION_PERFORMED='Uninstall'
     LOG_FILE="node-${NODE_VERSION}-${LINUX_DISTRO}-${ACTION_PERFORMED}-${DATE}.log"
-    EMAIL_SUBJECT="${HOSTNAME}: "${LOGDIR}/${LOG_FILE}" ${ACTION_PERFORMED} action completed successfully on ${DATE}."
 
     if [ -d ${INSTALLDIR} ]; then
         rm -rf "${INSTALLDIR}" && log "${SOFTWARENAME} ${INSTALLDIR} file removed." || log "Failed to remove ${INSTALLDIR}."
@@ -207,14 +205,7 @@ uninstall() {
 ## Main Execution Logic ############################################################################################################################################################
 
 case ${MODE} in
-    install)
-        install
-        ;;
-    uninstall)
-        uninstall
-        ;;
-    *)
-        echo "Invalid mode. Usage: MODE={install|uninstall} $0 or $0 {install|uninstall}"
-        exit 1
-        ;;
+    install) install ;;
+    uninstall) uninstall ;;
+    *) echo "Invalid mode. Usage: MODE=(install|uninstall)" ; exit 1 ;;
 esac
