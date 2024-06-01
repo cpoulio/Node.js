@@ -96,10 +96,19 @@ extract_nodejs() {
         log "Successfully extracted ${NODEJSFILE}."
 
         log 'Fixing npm logging issue...'
-        cd "${INSTALLDIR}/${NODEJSFILE}/lib/node_modules/npm/node_modules/npmlog/lib"
-        cp 'log.js' 'log.js.org'
-        sed -i -e 's|log.progressEnabled|//log.progressEnabled|' 'log.js'
-        if grep '//log.progressEnabled' log.js > /dev/null; then
+
+        # Find the log.js file dynamically
+        LOG_JS_PATH=$(find "${INSTALLDIR}/${NODEJSFILE}/lib/node_modules/npm" -type f -name 'log.js')
+        
+        if [ -z "$LOG_JS_PATH" ]; then
+            log 'log.js file not found, npm logging fix cannot be applied'
+            return 1
+        fi
+        
+        cp "$LOG_JS_PATH" "${LOG_JS_PATH}.org"
+        sed -i -e 's|log.progressEnabled|//log.progressEnabled|' "$LOG_JS_PATH"
+        
+        if grep '//log.progressEnabled' "$LOG_JS_PATH" > /dev/null; then
             log 'npm logging fix applied successfully'
         else
             log 'npm logging fix failed'
