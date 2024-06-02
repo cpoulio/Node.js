@@ -95,23 +95,12 @@ extract_nodejs() {
     else
         log "Successfully extracted ${NODEJSFILE}."
 
-        log 'Fixing npm logging issue...'
-
-        # Find the log.js file dynamically
-        LOG_JS_PATH=$(find "${INSTALLDIR}/${NODEJSFILE}/lib/node_modules/npm" -type f -name 'log.js')
-        
-        if [ -z "$LOG_JS_PATH" ]; then
-            log 'log.js file not found, npm logging fix cannot be applied'
-            return 1
-        fi
-        
-        cp "$LOG_JS_PATH" "${LOG_JS_PATH}.org"
-        sed -i -e 's|log.progressEnabled|//log.progressEnabled|' "$LOG_JS_PATH"
-        
-        if grep '//log.progressEnabled' "$LOG_JS_PATH" > /dev/null; then
-            log 'npm logging fix applied successfully'
+        log 'Setting npm logging level...'
+        "${INSTALLDIR}/${NODEJSFILE}/bin/npm" config set loglevel warn
+        if [ $? -eq 0 ]; then
+            log 'npm logging level set to warn successfully'
         else
-            log 'npm logging fix failed'
+            log 'Failed to set npm logging level'
         fi
     fi
 }
@@ -192,17 +181,21 @@ uninstall() {
     ACTION_PERFORMED='Uninstall'
     LOG_FILE="node-${NODE_VERSION}-${LINUX_DISTRO}-${ACTION_PERFORMED}-${DATE}.log"
 
-    if [ -d ${INSTALLDIR} ]; then
-        rm -rf "${INSTALLDIR}" && log "${SOFTWARENAME} ${INSTALLDIR} file removed." || log "Failed to remove ${INSTALLDIR}."
+    # Find the current Node.js installation directory
+    NODEJS_INSTALLED_DIR=$(find ${INSTALLDIR} -maxdepth 1 -type d -name "node-v*" | head -n 1)
+    
+    if [ -d "${NODEJS_INSTALLED_DIR}" ]; then
+        rm -rf "${NODEJS_INSTALLED_DIR}" && log "${SOFTWARENAME} ${INSTALLDIR} file removed." || log "Failed to remove ${INSTALLDIR}."
         rm -f /usr/local/bin/npx  && log "${SOFTWARENAME} npx file removed." || log 'Failed to remove npx.'
         rm -f /usr/local/bin/npm  && log "${SOFTWARENAME} npm file removed." || log 'Failed to remove npm.'
         rm -f /usr/local/bin/node && log "${SOFTWARENAME} node file removed." || log 'Failed to remove node.'
+        
+        # Backup and clean up .bash_profile
         cp -p ~/.bash_profile ~/.bash_profile.bak | tee -a "${LOGDIR}/${LOG_FILE}"
         log 'bash_profile backed up'
-        sed -i 's/#PATH=/PATH=/' ~/.bash_profile
-        sed -i "/node-${NODE_VERSION}-${LINUX_DISTRO}/d" ~/.bash_profile
-        sed -i "/LINUX_DISTRO=${LINUX_DISTRO}/d" ~/.bash_profile
-        sed -i "\|export PATH=${INSTALLDIR}/node-${NODE_VERSION}-${LINUX_DISTRO}/bin:\$PATH|d" ~/.bash_profile
+        
+                # Remove Node.js paths from .bash_profile
+        sed -i "/${INSTALLDIR//\//\\/}\/node-v.*-${LINUX_DISTRO}\/bin/d" ~/.bash_profile
         sed -i "\|export PATH=\$PATH:\$HOME/bin|d" ~/.bash_profile
         log "${SOFTWARENAME} removed cleanly."
     else
