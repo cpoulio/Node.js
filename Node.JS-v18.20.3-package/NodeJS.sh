@@ -62,7 +62,7 @@ log() {
 send_email() {
     echo 'Sending email notification...'
     EMAIL_SUBJECT="${HOSTNAME}: ${LOG_FILE} successfully."
-    cat "${LOGDIR}/${LOG_FILE}" | mailx -s "$EMAIL_SUBJECT" "$EMAIL_RECIPIENT"
+    cat "${LOGDIR}/${LOG_FILE}" | mailx -s "${EMAIL_SUBJECT}" "${EMAIL_RECIPIENT}"
 }
 
 install_YUM_packages() {
@@ -96,13 +96,6 @@ extract_nodejs() {
     else
         log "Successfully extracted ${NODEJSFILE}."
 
-        log 'Setting npm logging level...'
-        "${INSTALLDIR}/${NODEJSFILE}/bin/npm" config set loglevel warn
-        if [ $? -eq 0 ]; then
-            log 'npm logging level set to warn successfully'
-        else
-            log 'Failed to set npm logging level'
-        fi
     fi
 }
 
@@ -127,7 +120,7 @@ install() {
 
     # Create and verify symbolic link for node
     echo "Establishing symbolic links..."
-    ln -s "${FILEPATH}/node" /usr/local/bin/node
+    ln -sf "${FILEPATH}/node" /usr/local/bin/node
     if [ -L /usr/local/bin/node ] && [ -x /usr/local/bin/node ]; then
         log "Symbolic link for node created successfully and is executable."
     else
@@ -135,7 +128,7 @@ install() {
         exit 1
     fi
     # Create and verify symbolic link for npm
-    ln -s "${FILEPATH}/npm" /usr/local/bin/npm
+    ln -sf "${FILEPATH}/npm" /usr/local/bin/npm
     if [ -L /usr/local/bin/npm ] && [ -x /usr/local/bin/npm ]; then
         log "Symbolic link for npm created successfully and is executable."
     else
@@ -143,7 +136,7 @@ install() {
         exit 1
     fi
     # Create and verify symbolic link for npx
-    ln -s "${FILEPATH}/npx" /usr/local/bin/npx
+    ln -sf "${FILEPATH}/npx" /usr/local/bin/npx
     if [ -L /usr/local/bin/npx ] && [ -x /usr/local/bin/npx ]; then
         log "Symbolic link for npx created successfully and is executable."
     else
@@ -172,6 +165,19 @@ install() {
         exit 2
     fi
 
+    # Set npm logging level
+    log 'Setting npm logging level...'
+    NPM_PATH=$(which npm)
+    if [ -x "$NPM_PATH" ]; then
+        $NPM_PATH config set loglevel warn
+        if [ $? -eq 0 ]; then
+            log 'npm logging level set to warn successfully'
+        else
+            log 'Failed to set npm logging level'
+        fi
+    else
+        log 'npm binary not found or not executable'
+    fi
     log "Installation and verification completed."
     send_email
 }
