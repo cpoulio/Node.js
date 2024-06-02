@@ -14,7 +14,8 @@
 ## Common Variables ############################################################################################################################################################
 
 #deploy_dir='.' # Comment out when deploying with Ansible.
-VERSION='18.20.3'NPM_VERSION='10.7.0'
+VERSION='18.20.3'
+NPM_VERSION='10.7.0'
 
 SOFTWARENAME='NodeJS'
 EMAIL_RECIPIENT='christopher.g.pouliot@irs.gov'
@@ -119,6 +120,11 @@ install() {
 
     # Create and verify symbolic link for node
     echo "Establishing symbolic links..."
+
+    if [ ! -d /usr/local/bin ]; then
+        mkdir -p '/usr/local/bin'
+    fi
+
     ln -sf "${FILEPATH}/node" /usr/local/bin/node
     if [ -L /usr/local/bin/node ] && [ -x /usr/local/bin/node ]; then
         log "Symbolic link for node created successfully and is executable."
@@ -187,11 +193,12 @@ uninstall() {
     ACTION_PERFORMED='Uninstall'
     LOG_FILE="node-${NODE_VERSION}-${LINUX_DISTRO}-${ACTION_PERFORMED}-${DATE}.log"
 
+    rm -Rf ${INSTALLDIR}
+
     # Locate the node binary
     NODE_PATH=$(which node)
     if [ -z "$NODE_PATH" ]; then
-        log "${SOFTWARENAME} is not installed. Exiting uninstall."
-        return 1
+        log "${SOFTWARENAME} is not installed."
     fi
 
     # Determine the installation directory
@@ -201,10 +208,9 @@ uninstall() {
     # Verify if the determined directory is correct and remove it
     if [[ "$INSTALLDIR" == "/usr/local/lib/nodejs" ]]; then
         log "Removing Node.js installation directory: ${INSTALLDIR}"
-        rm -rf "$INSTALLDIR" && log "${SOFTWARENAME} ${INSTALLDIR} directory removed." || log "Failed to remove ${INSTALLDIR}."
+        rm -Rf "$INSTALLDIR" && log "${SOFTWARENAME} ${INSTALLDIR} directory removed." || log "Failed to remove ${INSTALLDIR}."
     else
-        log "Determined installation directory is incorrect: ${INSTALLDIR}. Exiting uninstall."
-        return 1
+        log "Determined installation directory is incorrect: ${INSTALLDIR}."
     fi
 
     # Remove symbolic links
