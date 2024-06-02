@@ -14,8 +14,7 @@
 ## Common Variables ############################################################################################################################################################
 
 #deploy_dir='.' # Comment out when deploying with Ansible.
-VERSION='18.20.3'
-NPM_VERSION='10.7.0'
+VERSION='18.20.3'NPM_VERSION='10.7.0'
 
 SOFTWARENAME='NodeJS'
 EMAIL_RECIPIENT='christopher.g.pouliot@irs.gov'
@@ -211,18 +210,12 @@ uninstall() {
     rm -f /usr/local/bin/npm  && log "${SOFTWARENAME} npm file removed." || log 'Failed to remove npm.'
     rm -f /usr/local/bin/node && log "${SOFTWARENAME} node file removed." || log 'Failed to remove node.'
 
-    # Remove other potential Node.js installation paths
-    NODE_BIN_DIR=$(dirname "$NODE_PATH")
-    if [ -d "$NODE_BIN_DIR" ]; then
-        rm -rf "$NODE_BIN_DIR" && log "${SOFTWARENAME} ${NODE_BIN_DIR} directory removed." || log "Failed to remove ${NODE_BIN_DIR}."
-    fi
-
     # Backup and clean up .bash_profile and other potential environment files
     cp -p ~/.bash_profile ~/.bash_profile.bak | tee -a "${LOGDIR}/${LOG_FILE}"
     log 'bash_profile backed up'
 
     sed -i "/${INSTALLDIR//\//\\/}\/node-v.*\/bin/d" ~/.bash_profile
-    sed -i "/export PATH=${NODE_BIN_DIR//\//\\/}:\$PATH/d" ~/.bash_profile
+    sed -i "/export PATH=${INSTALLDIR//\//\\/}\/node-v.*\/bin:\$PATH/d" ~/.bash_profile
     sed -i "\|export PATH=\$PATH:\$HOME/bin|d" ~/.bash_profile
 
     # Check and clean up other common shell profile files
@@ -231,15 +224,15 @@ uninstall() {
             cp -p "$PROFILE" "${PROFILE}.bak" | tee -a "${LOGDIR}/${LOG_FILE}"
             log "${PROFILE} backed up"
             sed -i "/${INSTALLDIR//\//\\/}\/node-v.*\/bin/d" "$PROFILE"
-            sed -i "/export PATH=${NODE_BIN_DIR//\//\\/}:\$PATH/d" "$PROFILE"
+            sed -i "/export PATH=${INSTALLDIR//\//\\/}\/node-v.*\/bin:\$PATH/d" "$PROFILE"
         fi
     done
 
     log "${SOFTWARENAME} removed cleanly."
     log "Uninstall completed."
-
     send_email
 }
+
 ## Update ############################################################################################################################################################
 
 update() {
