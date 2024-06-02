@@ -198,12 +198,14 @@ uninstall() {
     INSTALLDIR=$(dirname $(dirname "$NODE_PATH"))
     log "Node.js installation directory determined: ${INSTALLDIR}"
 
-    # Find and remove all Node.js installation directories
-    for NODEJS_DIR in ${INSTALLDIR}/node-v*; do
-        if [ -d "$NODEJS_DIR" ]; then
-            rm -rf "$NODEJS_DIR" && log "${SOFTWARENAME} ${NODEJS_DIR} directory removed." || log "Failed to remove ${NODEJS_DIR}."
-        fi
-    done
+    # Verify if the determined directory is correct and remove it
+    if [[ "$INSTALLDIR" == "/usr/local/lib/nodejs" ]]; then
+        log "Removing Node.js installation directory: ${INSTALLDIR}"
+        rm -rf "$INSTALLDIR" && log "${SOFTWARENAME} ${INSTALLDIR} directory removed." || log "Failed to remove ${INSTALLDIR}."
+    else
+        log "Determined installation directory is incorrect: ${INSTALLDIR}. Exiting uninstall."
+        return 1
+    fi
 
     # Remove symbolic links
     rm -f /usr/local/bin/npx  && log "${SOFTWARENAME} npx file removed." || log 'Failed to remove npx.'
