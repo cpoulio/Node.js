@@ -1,0 +1,15 @@
+#!/bin/sh
+#
+#  NO INPUT is required in Ansible Deployment unless;
+#       -  You need to override the MODE (default is install [other vals: reinstall, uninstall, forceuninstall])
+#       -  You need to provide a INSTALLDIR (default is /usr/local)
+#
+echo "Hellow World!"
+echo "Current Directory `pwd`"
+#unzip node-v18.17.1-linux-x64.zip
+#./run_install_nodejs_v18171.sh ${INSTALLDIR} ${deploy_dir} ${EMAIL}
+./run_install_nodejs_v18171.sh /usr/local palanisamy.k.payiran@irs.gov ${deploy_dir}
+./run_verify_nodejs_v18171.sh /usr/local palanisamy.k.payiran@irs.gov
+
+echo "Ending Node.JS v18.17.1 installation"
+
