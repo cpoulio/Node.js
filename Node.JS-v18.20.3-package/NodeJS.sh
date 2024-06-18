@@ -188,11 +188,16 @@ uninstall() {
     ACTION_PERFORMED='Uninstall'
     LOG_FILE="node-${NODE_VERSION}-${LINUX_DISTRO}-${ACTION_PERFORMED}-${DATE}.log"
 
+    rm -Rf ${INSTALLDIR}
+    rm -Rf /usr/local/lib/node*
+    rm -Rf /usr/local/bin/node*
+    rm -Rf /usr/local/bin/npm*
+    rm -Rf /usr/local/bin/npx*
+    
     # Locate the node binary
     NODE_PATH=$(which node)
     if [ -z "$NODE_PATH" ]; then
-        log "${SOFTWARENAME} is not installed. Exiting uninstall."
-        return 1
+        log "${SOFTWARENAME} is not installed or can not be found."
     fi
 
     # Determine the installation directory
@@ -202,7 +207,7 @@ uninstall() {
     # Find and remove all Node.js installation directories
     for NODEJS_DIR in ${INSTALLDIR}/node-v*; do
         if [ -d "$NODEJS_DIR" ]; then
-            rm -rf "$NODEJS_DIR" && log "${SOFTWARENAME} ${NODEJS_DIR} directory removed." || log "Failed to remove ${NODEJS_DIR}."
+            rm -rf "$NODEJS_DIR" && log "${SOFTWARENAME} ${NODEJS_DIR} directory removed." || log "Failed to remove ${NODEJS_DIR} or it has already been uninstalled."
         fi
     done
 
