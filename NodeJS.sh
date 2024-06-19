@@ -99,6 +99,14 @@ extract_nodejs() {
     fi
 }
 
+update_bash_profile () {
+    echo "Updating .bash_profile..."
+    sed -i -e 's|^PATH=\$PATH:\$HOME/bin|#PATH=\$PATH:\$HOME/bin|' ~/.bash_profile
+    echo "" >> ~/.bash_profile
+    echo "export PATH=${INSTALLDIR}/node-${NODE_VERSION}-${LINUX_DISTRO}/bin:\$PATH" >> ~/.bash_profile # This is where it sets Version with echo
+    echo ".bash_profile was updated!"
+    . ~/.bash_profile
+}
 ## Combined install and verify function ############################################################################################################################################################
 
 install() {
@@ -110,17 +118,16 @@ install() {
 
     extract_nodejs # Check if the ${SOFTWARENAME} tar file was found and Extract ${SOFTWARENAME} function.
 
-    # Update bash_profile
-    echo "Updating .bash_profile..."
-    sed -i -e 's|^PATH=\$PATH:\$HOME/bin|#PATH=\$PATH:\$HOME/bin|' ~/.bash_profile
-    echo "" >> ~/.bash_profile
-    echo "export PATH=${INSTALLDIR}/node-${NODE_VERSION}-${LINUX_DISTRO}/bin:\$PATH" >> ~/.bash_profile # This is where it sets Version with echo
-    echo ".bash_profile was updated!"
-    . ~/.bash_profile
+    update_bash_profile # Call the function to update and source .bash_profile
+
+    # Locate binaries using which
+    NODE_BIN_PATH=$(which node)
+    NPM_BIN_PATH=$(which npm)
+    NPX_BIN_PATH=$(which npx)
 
     # Create and verify symbolic link for node
     echo "Establishing symbolic links..."
-    ln -sf "${FILEPATH}/node" /usr/local/bin/node
+    ln -sf "${NODE_BIN_PATH}" /usr/local/bin/node
     if [ -L /usr/local/bin/node ] && [ -x /usr/local/bin/node ]; then
         log "Symbolic link for node created successfully and is executable."
     else
@@ -128,7 +135,7 @@ install() {
         exit 1
     fi
     # Create and verify symbolic link for npm
-    ln -sf "${FILEPATH}/npm" /usr/local/bin/npm
+    ln -sf "${NPM_BIN_PATH}" /usr/local/bin/npm
     if [ -L /usr/local/bin/npm ] && [ -x /usr/local/bin/npm ]; then
         log "Symbolic link for npm created successfully and is executable."
     else
@@ -136,7 +143,7 @@ install() {
         exit 1
     fi
     # Create and verify symbolic link for npx
-    ln -sf "${FILEPATH}/npx" /usr/local/bin/npx
+    ln -sf "${NPX_BIN_PATH}" /usr/local/bin/npx
     if [ -L /usr/local/bin/npx ] && [ -x /usr/local/bin/npx ]; then
         log "Symbolic link for npx created successfully and is executable."
     else
