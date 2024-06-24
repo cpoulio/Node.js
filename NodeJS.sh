@@ -135,9 +135,10 @@ backup_and_remove_old_paths() {
 }
 
 
-## Combined install and verify function ############################################################################################################################################################
+### Combined install and verify function ############################################################################################################################################################
 
 install() {
+
     log 'Starting Install and Verify Function'
     ACTION_PERFORMED='Install and Verify'
     LOG_FILE="node-${NODE_VERSION}-${LINUX_DISTRO}-${ACTION_PERFORMED}-${DATE}.log"
@@ -179,7 +180,7 @@ install() {
         exit 1
     fi
     echo "Node Version Installed: ${NODE_VERSION}"
-    
+
     # Verify installation
     log "Verifying the install of ${SOFTWARENAME} at version ${NODE_VERSION}"
     NODECHECK=$(${FILEPATH}/node -v)
@@ -216,10 +217,13 @@ install() {
 
     log "Installation and verification completed."
     send_email
+
 }
-## Uninstall ############################################################################################################################################################
+
+### Uninstall ############################################################################################################################################################
 
 uninstall() {
+
     log "Starting Uninstall ${SOFTWARENAME} Function"
     ACTION_PERFORMED='Uninstall'
     LOG_FILE="node-${NODE_VERSION}-${LINUX_DISTRO}-${ACTION_PERFORMED}-${DATE}.log"
@@ -229,7 +233,7 @@ uninstall() {
     rm -Rf /usr/local/bin/node*
     rm -Rf /usr/local/bin/npm*
     rm -Rf /usr/local/bin/npx*
-    
+
     # Locate the node binary and proceed only if found
     NODE_PATH=$(which node)
     if [ -n "$NODE_PATH" ]; then
@@ -246,18 +250,19 @@ uninstall() {
             fi
         done
     else
-    
+        log "${SOFTWARENAME} installed not found."
+    fi
+
     # Remove other potential Node.js installation paths
     NODE_BIN_DIR=$(dirname "$NODE_PATH")
     if [ -d "$NODE_BIN_DIR" ]; then
         rm -rf "$NODE_BIN_DIR" && log "${SOFTWARENAME} ${NODE_BIN_DIR} directory removed." || log "Failed to remove ${NODE_BIN_DIR}."
     fi
-    
+
     # Remove symbolic links
     rm -f /usr/local/bin/npx  && log "${SOFTWARENAME} npx file removed." || log 'Failed to remove npx.'
     rm -f /usr/local/bin/npm  && log "${SOFTWARENAME} npm file removed." || log 'Failed to remove npm.'
     rm -f /usr/local/bin/node && log "${SOFTWARENAME} node file removed." || log 'Failed to remove node.'
-
 
     backup_and_remove_old_paths
 
@@ -265,8 +270,10 @@ uninstall() {
     log "Uninstall completed."
 
     send_email
+
 }
-## Update ############################################################################################################################################################
+
+### Update ############################################################################################################################################################
 
 update() {
     log "Starting Update ${SOFTWARENAME} Function"
@@ -278,7 +285,7 @@ update() {
 
     #### Install function ####
     install
-    
+
     # Log the completion of the update process
     log "${SOFTWARENAME} update complete."
 
