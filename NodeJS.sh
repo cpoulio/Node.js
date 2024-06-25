@@ -16,9 +16,10 @@
 #deploy_dir='.' # Comment out when deploying with Ansible.
 VERSION='18.20.3'
 NPM_VERSION='10.7.0'
+EMAIL="christopher.g.pouliot@irs.gov,${EMAIL}"
 
+### Variables that Do Not Change Much ######
 SOFTWARENAME='NodeJS'
-EMAIL_RECIPIENT='christopher.g.pouliot@irs.gov'
 HOSTNAME="$(uname -n)"
 INSTALLDIR='/usr/local/lib/nodejs'
 LOGDIR="/tmp"
@@ -36,6 +37,7 @@ echo "${FILEPATH}"
 echo "${NODE_VERSION}"
 echo "DATE=${DATE}"
 printf "DATE=%s\n" ${DATE}
+echo "${EMAIL}"
 
 ## Check for command-line arguments for MODE #### ***VERY IMPORTANT**** ###
 for ARG in "$@"
@@ -60,9 +62,9 @@ log() {
 }
 
 send_email() {
-    echo 'Sending email notification...'
+    echo 'Sending-email notification...'
     EMAIL_SUBJECT="${HOSTNAME}: ${LOG_FILE} successfully."
-    cat "${LOGDIR}/${LOG_FILE}" | mailx -s "${EMAIL_SUBJECT}" "${EMAIL_RECIPIENT}"
+    cat "${LOGDIR}/${LOG_FILE}" | mailx -s "${EMAIL_SUBJECT}" ${EMAIL}
 }
 
 install_YUM_packages() {
