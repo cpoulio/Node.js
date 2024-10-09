@@ -5,7 +5,7 @@
 
 ## How to Install:
 
-- Place the <node-*VERSION*-linux-x64.tar.xz> and the license file in the script's directory.
+- Place the node-<*VERSION*>-linux-x64.tar.xz and the license file in the script's directory.
 
 - Run the script with the *Install* with the NodeJS.sh script:
     `./NodeJS.sh install`
