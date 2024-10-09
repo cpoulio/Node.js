@@ -1,28 +1,37 @@
 # NodeJS.sh ReadMe!
 ## Nexus Tag:
-- Node.JS-v18.20.2
-## How to Install
+- Node.JS-v18.20.3-linux-x64
+- Node.JS-v20.18.0-linux-x64
+## How to Install: Install 
 
-- Place the NodeJS18.tar.xz and the license file in the script's directory.
-- Run the script locally with the install argument:
+- Place the <node-*VERSION*-linux-x64.tar.xz> and the license file in the script's directory.
+- Run the script with the install with the NodeJS.sh script:
     `./NodeJS.sh install`
 
 - Run the script with setup.sh, install is default and does not need an argument:
     `./setup.sh`
 
-## How to Uninstall
+## How to Uninstall:
 
-- Run the script with the uninstall argument:
+- Run the script with the uninstall with the NodeJS.sh script:
     `./NodeJS.sh uninstall`
 
-- Run the script with setup.sh, uninstall is default and does not need an argument:
+- Run the script with setup.sh uninstall:
     `MODE=uninstall ./setup.sh`
+
+## How to Update: This will run the  *Ininstall* and then *Uninstall* functions
+
+- Run the script with the update with the NodeJS.sh script:
+    `./NodeJS.sh update`
+
+- Run the script with setup.sh update:
+    `MODE=update ./setup.sh`
 
 ### Install Mode:
 1. Install required YUM packages.
 2. Extract NodeJS from the tarball.
-3. Update the .bash_profile to set the environment path.
-4. Establish symbolic links for NodeJS binaries.
+3. Establish symbolic links for NodeJS binaries.
+4. Update the .bash_profile to set the environment path.
 5. Verify the NodeJS and npm installations.
 6. Send a completion email with the installation log.
 
@@ -33,7 +42,7 @@
 4. Send a completion email with the uninstallation log.
 
 ## Features
-- Automates the installation and uninstallation of NodeJS version 18.
+- Automates the installation and uninstallation of NodeJS.
 - Dynamically sets installation log file paths.
 - Handles prerequisite package installations using YUM.
 - Updates user .bash_profile for environment setup.
@@ -43,8 +52,8 @@
 
 ## Prerequisites
 
-- NodeJS tarball (NodeJS18.tar.xz) and license properties file must be placed in the same directory as the script.
 - YUM package manager needed. Necessary development packages like `openssl-devel`, `bzip2-devel`, `libicu-devel`, `gcc-c++`, and `make` need to be installed.
+- Mailx is recommended but not required. This will alow you to recieve your log by email.
 
 ## Variables
 
