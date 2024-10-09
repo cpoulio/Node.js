@@ -2,21 +2,22 @@
 ## Nexus Tag:
 - Node.JS-v18.20.3-linux-x64
 - Node.JS-v20.18.0-linux-x64
-## How to Install: Install 
+
+## How to Install:
 
 - Place the <node-*VERSION*-linux-x64.tar.xz> and the license file in the script's directory.
-- Run the script with the install with the NodeJS.sh script:
+
+- Run the script with the *Install* with the NodeJS.sh script:
     `./NodeJS.sh install`
 
 - Run the script with setup.sh, install is default and does not need an argument:
     `./setup.sh`
 
 ## How to Uninstall:
-
-- Run the script with the uninstall with the NodeJS.sh script:
+- Run the script with the *Uninstall* with the NodeJS.sh script:
     `./NodeJS.sh uninstall`
 
-- Run the script with setup.sh uninstall:
+- Run the script with setup.sh *Uninstall*:
     `MODE=uninstall ./setup.sh`
 
 ## How to Update: This will run the  *Ininstall* and then *Uninstall* functions
@@ -56,26 +57,43 @@
 - Mailx is recommended but not required. This will alow you to recieve your log by email.
 
 ## Variables
-
 - `EMAIL_RECIPIENT`: Email address to receive log notifications.
 - `HOSTNAME`: Hostname of the system where the script is executed.
 - `INSTALLDIR`: Directory for NodeJS installation.
-- `NPM_VERSION`, `VERSION18`: Specific versions of npm and NodeJS to be installed.
-- `DISTRO18`: Target distribution identifier.
+- `NPM_VERSION`: Specific version of npm to be installed.
+- `VERSION`: Specifies the version of NodeJS to be installed.
+- `SOFTWARENAME`: Name of the software being installed, in this case, NodeJS.
+- `NODE_VERSION`: NodeJS version with the `v` prefix, used in constructing the filename and directory paths.
+- `LINUX_DISTRO`: Specifies the target Linux distribution architecture, typically set to `linux-x64`.
 - `NODEJSFILE`: Constructed filename for the NodeJS installation file.
 - `FILEPATH`: Path to the NodeJS binary files.
 - `YUM_PACKAGES`: List of packages to be installed via YUM.
 - `LOGDIR`: Directory for storing log files.
 - `DATE`: Current date and time, used in logs and filenames.
 
-## Functions
+## Check Variables
+- `echo "Deployment Directory=${deploy_dir}"`: Displays the deployment directory being used; defaults to `.` if not explicitly set.
+- `echo "${NODEJSFILE}"`: Shows the constructed filename for the NodeJS installation file.
+- `echo "${FILEPATH}"`: Prints the path where NodeJS binary files are located.
+- `echo "${NODE_VERSION}"`: Outputs the NodeJS version with the `v` prefix for clarity.
+- `echo "DATE=${DATE}"`: Displays the current date and time, which is useful for log timestamps.
+- `printf "DATE=%s\n" ${DATE}`: Another way to print the date, formatted in a specific way for readability in logs.
+- `echo "${EMAIL}"`: Outputs the email address(es) used for notifications, verifying that they are correctly set.
 
-- `log`: Appends a timestamped message to the installation log file.
-- `send_email`: Sends an email with the log file as its content.
-- `install_YUM_packages`: Installs required YUM packages and logs the installation status.
-- `extract_nodejs`: Extracts the NodeJS installation tarball.
-- `install`: Orchestrates the complete installation and verification process.
-- `uninstall`: Handles the uninstallation process and system cleanup.
+*These commands help verify that all necessary variables are properly initialized before the script performs more complex tasks.
+
+### Function Explanations
+
+- `log()`: Logs a message with a timestamp to the specified log file, allowing tracking of script actions.
+- `send_email()`: Sends an email notification with the contents of the log file, providing a summary of the script's actions.
+- `install_YUM_packages()`: Installs necessary packages using YUM, ensuring prerequisites are in place before proceeding.
+- `extract_nodejs()`: Checks for the presence of the NodeJS tar file and extracts it to the installation directory.
+- `update_bash_profile()`: Updates the user's `.bash_profile` to include the NodeJS binary path and reloads the profile to apply changes.
+- `temp_profile()`: Temporarily adds the NodeJS binary path to the current session's `PATH`.
+- `backup_and_remove_old_paths()`: Backs up profile files and removes outdated NodeJS paths from them to prevent conflicts with the new installation.
+- `install()`: Combines installation steps, including package installation, NodeJS extraction, path updates, symbolic link creation, and version verification. Sends a summary email upon completion.
+- `uninstall()`: Removes NodeJS files, symbolic links, and profile entries to cleanly uninstall NodeJS from the system. Sends an email notification after uninstallation.
+- `update()`: Uninstalls any existing NodeJS version and reinstalls the latest version, combining the `uninstall` and `install` functions for a complete update. An email summary is sent upon completion.
 
 # Execution Logic:
 ## Command-Line Arguments Check:
@@ -126,13 +144,7 @@ case ${MODE} in
         ;;
 esac
 ```
-## Check Variables
-This script section outputs the values of key variables, useful for debugging and ensuring correct setup:
-- `echo "${NODEJSFILE}"`: Displays the filename for the NodeJS installation.
-- `echo "${FILEPATH}"`: Shows the path where NodeJS binaries are stored.
-- `echo "${NODE_VERSION}"`: Prints the currently set NodeJS version.
-- `echo "DATE=${DATE}"` and `printf "DATE=%s\n" ${DATE}`: Both commands output the current date and time, useful for logging and timestamping operations in the script.
-- *These commands help verify that all necessary variables are properly initialized before the script performs more complex tasks.
+
 ## Additional Notes
 - The script assumes mailx is configured for sending emails.
 - Proper error handling is in place to exit the installation or uninstallation process upon encountering any significant failure, ensuring robustness.
