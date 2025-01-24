@@ -64,7 +64,7 @@ log() {
 send_email() {
     echo 'Sending-email notification...'
     EMAIL_SUBJECT="${HOSTNAME}: ${LOG_FILE} successfully."
-    cat "${LOGDIR}/${LOG_FILE}" | mailx -S replyto=no_reply@irs.gov -s "${EMAIL_SUBJECT}" ${EMAIL}
+    mailx -S replyto=no_reply@irs.gov -s "${EMAIL_SUBJECT}" ${EMAIL} < "${LOGDIR}/${LOG_FILE}"
 }
 
 install_YUM_packages() {
