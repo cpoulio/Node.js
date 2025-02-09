@@ -54,7 +54,12 @@ parse_and_convert_args() {
             FLAGS+=" $FLAG_NAME \"$VALUE\""
         fi
     done
-    
+
+    # Ensure MODE is explicitly passed if it's not already in the flags
+    if [[ ! "$FLAGS" =~ "--mode" ]]; then
+        FLAGS="--mode install $FLAGS"
+    fi
+
     echo "$FLAGS"
 }
 
