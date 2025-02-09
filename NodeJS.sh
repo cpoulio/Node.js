@@ -17,6 +17,7 @@
 VERSION='18.20.3'
 NPM_VERSION='10.7.0'
 EMAIL="christopher.g.pouliot@irs.gov,${EMAIL}"
+EMAIL="${EMAIL%,}"  # Removes trailing comma if EMAIL is empty
 
 ### Variables that Do Not Change Much ######
 SOFTWARENAME='NodeJS'
