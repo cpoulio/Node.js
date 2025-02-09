@@ -20,15 +20,32 @@
 
 # Define expected flags (uppercase)
 EXPECTED_FLAGS="MODE,EMAIL"
+VALID_MODES=("install" "uninstall" "update")
 
 # If MODE is not set, default to "install"
 if [[ -z "${MODE}" ]]; then  
     MODE="install"
 fi
 
-# Path to the main script
+# Validate MODE input
+validate_mode() {
+    for valid in "${VALID_MODES[@]}"; do
+        if [[ "$MODE" == "$valid" ]]; then
+            return 0
+        fi
+    done
+    echo "❌ ERROR: Invalid MODE '$MODE'. Must be one of: install, uninstall, update."
+    exit 1
+}
+
+# Validate script path
 SCRIPT="${deploy_dir}/NodeJS.sh"  # For Ansible deployment
 #SCRIPT="./NodeJS.sh"  # Uncomment for local testing
+
+if [[ ! -f "$SCRIPT" ]]; then
+    echo "❌ ERROR: Main script '$SCRIPT' not found. Ensure it exists and is executable."
+    exit 1
+fi
 
 # --------------------------------------------
 # FUNCTION: Parse Arguments & Convert `KEY=VALUE` to Flags
@@ -55,12 +72,15 @@ parse_and_convert_args() {
     echo "$FLAGS"
 }
 
+# Validate MODE
+validate_mode
+
 # Convert both KEY=VALUE environment variables AND manual flags
 ARG_FLAGS=$(parse_and_convert_args)
 FINAL_ARGS="$ARG_FLAGS $*"
 
 # Debugging: Print the final command before executing
-echo "Executing command: ${SCRIPT} ${FINAL_ARGS}"
+echo "🔹 Executing: ${SCRIPT} ${FINAL_ARGS}"
 
 # Execute the script correctly
 set -- ${FINAL_ARGS}
