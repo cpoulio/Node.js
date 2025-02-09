@@ -9,33 +9,25 @@
 # - Case insensitivity
 # - Default values when arguments are missing
 # - Put arguments in any order
-# Usage:
-# You can call this script using either KEY=VALUE format (for Ansible) or flags (for manual execution).
 #
-# ✅ Using KEY=VALUE format (Ansible style):
+# ✅ Supports:
 # MODE=install ./setup_nodejs.sh
-# MODE=uninstall ./setup_nodejs.sh
-# MODE=update ./setup_nodejs.sh
-# MODE=install EMAIL=admin@example.com ./setup_nodejs.sh
-#
-# ✅ Using flags (manual execution):
 # ./setup_nodejs.sh --mode install
 # ./setup_nodejs.sh --mode uninstall
 # ./setup_nodejs.sh --mode update
 # ./setup_nodejs.sh --mode install --email admin@example.com
-
 ###############################################################################################################
 
-# Define all expected flags here so they can be changed easily and they HAVE TO be in uppercase!!!
+# Define expected flags (uppercase)
 EXPECTED_FLAGS="MODE,EMAIL"
 
-# Ensure MODE is blanked out before assigning a default value
+# If MODE is not set, default to "install"
 if [[ -z "${MODE}" ]]; then  
-    MODE="install"  # Default to install if not set
+    MODE="install"
 fi
 
 # Path to the main script
-SCRIPT="${deploy_dir}/NodeJS.sh"  # Deploy with Ansible
+SCRIPT="${deploy_dir}/NodeJS.sh"  # For Ansible deployment
 #SCRIPT="./NodeJS.sh"  # Uncomment for local testing
 
 # --------------------------------------------
@@ -43,8 +35,8 @@ SCRIPT="${deploy_dir}/NodeJS.sh"  # Deploy with Ansible
 # --------------------------------------------
 parse_and_convert_args() {
     FLAGS=""
-    
-    # Convert the comma-separated list into an array
+
+    # Convert comma-separated list into an array
     IFS=',' read -ra VARS <<< "$EXPECTED_FLAGS"
     
     for VAR in "${VARS[@]}"; do
@@ -55,7 +47,7 @@ parse_and_convert_args() {
         fi
     done
 
-    # Ensure MODE is explicitly passed if it's not already in the flags
+    # If --mode is missing, explicitly add --mode install
     if [[ ! "$FLAGS" =~ "--mode" ]]; then
         FLAGS="--mode install $FLAGS"
     fi
@@ -63,10 +55,15 @@ parse_and_convert_args() {
     echo "$FLAGS"
 }
 
-# Convert arguments and execute the main script
-ARG_FLAGS=$(parse_and_convert_args "$@")
-set -- ${ARG_FLAGS}
-${SCRIPT} "$@"
-echo "✅ NodeJS setup script executed successfully!"
+# Convert both KEY=VALUE environment variables AND manual flags
+ARG_FLAGS=$(parse_and_convert_args)
+FINAL_ARGS="$ARG_FLAGS $*"
 
-# End of script
+# Debugging: Print the final command before executing
+echo "Executing command: ${SCRIPT} ${FINAL_ARGS}"
+
+# Execute the script correctly
+set -- ${FINAL_ARGS}
+${SCRIPT} "$@"
+
+echo "✅ NodeJS setup script executed successfully!"
