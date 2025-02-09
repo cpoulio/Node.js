@@ -8,44 +8,26 @@
 # - Multi-word values
 # - Case insensitivity
 # - Default values when arguments are missing
-# - Put arguments in any order
+# - Arguments in any order
 #
 # ✅ Supports:
 # MODE=install ./setup_nodejs.sh
 # ./setup_nodejs.sh --mode install
 # ./setup_nodejs.sh --mode uninstall
 # ./setup_nodejs.sh --mode update
-# ./setup_nodejs.sh --mode install --email admin@example.com
+# ./setup_nodejs.sh --mode custom_task
 ###############################################################################################################
-
 # Define expected flags (uppercase)
 EXPECTED_FLAGS="MODE,EMAIL"
-VALID_MODES=("install" "uninstall" "update")
 
-# If MODE is not set, default to "install"
+# Ensure MODE is always set
 if [[ -z "${MODE}" ]]; then  
     MODE="install"
 fi
 
-# Validate MODE input
-validate_mode() {
-    for valid in "${VALID_MODES[@]}"; do
-        if [[ "$MODE" == "$valid" ]]; then
-            return 0
-        fi
-    done
-    echo "❌ ERROR: Invalid MODE '$MODE'. Must be one of: install, uninstall, update."
-    exit 1
-}
-
-# Validate script path
+# Path to the main script
 SCRIPT="${deploy_dir}/NodeJS.sh"  # For Ansible deployment
 #SCRIPT="./NodeJS.sh"  # Uncomment for local testing
-
-if [[ ! -f "$SCRIPT" ]]; then
-    echo "❌ ERROR: Main script '$SCRIPT' not found. Ensure it exists and is executable."
-    exit 1
-fi
 
 # --------------------------------------------
 # FUNCTION: Parse Arguments & Convert `KEY=VALUE` to Flags
@@ -72,9 +54,6 @@ parse_and_convert_args() {
     echo "$FLAGS"
 }
 
-# Validate MODE
-validate_mode
-
 # Convert both KEY=VALUE environment variables AND manual flags
 ARG_FLAGS=$(parse_and_convert_args)
 FINAL_ARGS="$ARG_FLAGS $*"
@@ -85,5 +64,3 @@ echo "🔹 Executing: ${SCRIPT} ${FINAL_ARGS}"
 # Execute the script correctly
 set -- ${FINAL_ARGS}
 ${SCRIPT} "$@"
-
-echo "✅ NodeJS setup script executed successfully!"
