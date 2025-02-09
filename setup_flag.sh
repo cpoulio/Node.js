@@ -17,6 +17,7 @@
 # ./setup_nodejs.sh --mode update
 # ./setup_nodejs.sh --mode custom_task
 ###############################################################################################################
+
 # Define expected flags (uppercase)
 EXPECTED_FLAGS="MODE,EMAIL"
 
@@ -56,7 +57,7 @@ parse_and_convert_args() {
 
 # Convert both KEY=VALUE environment variables AND manual flags
 ARG_FLAGS=$(parse_and_convert_args)
-FINAL_ARGS="$ARG_FLAGS $*"
+FINAL_ARGS=$(echo "$ARG_FLAGS $*" | xargs)  # Fix extra space issue
 
 # Debugging: Print the final command before executing
 echo "🔹 Executing: ${SCRIPT} ${FINAL_ARGS}"
@@ -64,3 +65,5 @@ echo "🔹 Executing: ${SCRIPT} ${FINAL_ARGS}"
 # Execute the script correctly
 set -- ${FINAL_ARGS}
 ${SCRIPT} "$@"
+
+#end of script
