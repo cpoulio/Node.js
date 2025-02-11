@@ -17,7 +17,8 @@
 #deploy_dir='.' # Comment out when deploying with Ansible.
 VERSION='20.18.1'
 NPM_VERSION='10.8.2'
-EMAIL="christopher.g.pouliot@irs.gov${EMAIL:+,$EMAIL}"
+DEFAULT_EMAIL="christopher.g.pouliot@irs.gov"
+EMAIL_LIST=("$DEFAULT_EMAIL")
 
 ### Variables that Do Not Change Much ######
 SOFTWARENAME='NodeJS'
@@ -69,6 +70,14 @@ if [[ ! "$MODE" =~ ^(install|uninstall|update)$ ]]; then
     echo "❌ Invalid mode: $MODE. Use --mode install, uninstall, or update."
     exit 1
 fi
+
+# Append user-provided email if given
+if [[ -n "$EMAIL" ]]; then
+    EMAIL_LIST+=("$EMAIL")
+fi
+
+# Join the emails with a comma
+EMAIL=$(IFS=,; echo "${EMAIL_LIST[*]}")
 
 ## Common Functions ############################################################################################################################################################
 
