@@ -11,16 +11,37 @@
 # - Arguments in any order
 #
 # ✅ Supports:
-# EMAIL=test@gmail.com MODE=install ./setup_flag.sh
-# ./setup_flag.sh --email test@gmail.com --mode uninstall
+# MODE=install ./setup_flag.sh
+# ./setup_flag.sh --mode install
+# ./setup_flag.sh --mode uninstall
+# ./setup_flag.sh --mode update
 ###############################################################################################################
 
 # Define expected flags (uppercase)
 EXPECTED_FLAGS="MODE,EMAIL"
 
-# Ensure MODE is always set
-if [[ -z "${MODE}" ]]; then  
-    MODE="install"
+# Capture command-line arguments
+CMD_ARGS=("$@")
+
+# Extract --mode argument from command-line input
+CMD_MODE=""
+for ((i = 0; i < ${#CMD_ARGS[@]}; i++)); do
+    if [[ "${CMD_ARGS[i]}" == "--mode" ]]; then
+        CMD_MODE="${CMD_ARGS[i+1]}"
+        break
+    fi
+done
+
+# Ensure MODE is always set, preferring:
+# 1. Command-line `--mode` if provided
+# 2. Environment variable `MODE`
+# 3. Default to "install"
+if [[ -n "$CMD_MODE" ]]; then
+    MODE="$CMD_MODE"
+elif [[ -n "${MODE}" ]]; then  
+    MODE="${MODE}"  # Keep environment value if set
+else
+    MODE="install"  # Default if nothing is set
 fi
 
 # Path to the main script
@@ -50,8 +71,12 @@ parse_and_convert_args() {
 # Convert both KEY=VALUE environment variables AND manual flags
 ARG_FLAGS=$(parse_and_convert_args "$@")
 
-# Build final arguments (keeping both converted flags and manual CLI input)
-FINAL_ARGS=$(echo "$ARG_FLAGS $*" | xargs)  # Fix extra spaces
+# Ensure there is only **one** `--mode` in FINAL_ARGS
+if [[ ! "$ARG_FLAGS" =~ "--mode" && ! "$*" =~ "--mode" ]]; then
+    FLAGS="--mode $MODE $FLAGS"
+fi
+
+FINAL_ARGS=$(echo "$FLAGS $*" | xargs)  # Fix extra spaces
 
 # Debugging: Print the final command before executing
 echo "🔹 Executing: ${SCRIPT} ${FINAL_ARGS}"
