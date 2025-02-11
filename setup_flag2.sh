@@ -52,14 +52,11 @@ parse_and_convert_args() {
 ARG_FLAGS=$(parse_and_convert_args)
 
 # Ensure `--mode` is only included once
-if [[ -n "$CMD_MODE" ]]; then
-    MODE="$CMD_MODE"  # Use command-line mode if provided
-elif [[ -z "$MODE" ]]; then
-    MODE="install"  # Default to install if nothing is set
+if [[ ! "$ARG_FLAGS" =~ "--mode" ]]; then
+    ARG_FLAGS="--mode $MODE $ARG_FLAGS"
 fi
 
-ARG_FLAGS="--mode $MODE"
-
+# Ensure `--email` is only included once
 if [[ -n "$EMAIL" && ! "$ARG_FLAGS" =~ "--email" ]]; then
     ARG_FLAGS+=" --email $EMAIL"
 fi
