@@ -71,12 +71,13 @@ parse_and_convert_args() {
 # Convert both KEY=VALUE environment variables AND manual flags
 ARG_FLAGS=$(parse_and_convert_args "$@")
 
-# Ensure there is only **one** `--mode` in FINAL_ARGS
+# Ensure there is always exactly **one** `--mode`
 if [[ ! "$ARG_FLAGS" =~ "--mode" && ! "$*" =~ "--mode" ]]; then
-    FLAGS="--mode $MODE $FLAGS"
+    ARG_FLAGS="--mode $MODE $ARG_FLAGS"
 fi
 
-FINAL_ARGS=$(echo "$FLAGS $*" | xargs)  # Fix extra spaces
+# Build final arguments (keeping both converted flags and manual CLI input)
+FINAL_ARGS=$(echo "$ARG_FLAGS $*" | xargs)  # Fix extra spaces
 
 # Debugging: Print the final command before executing
 echo "🔹 Executing: ${SCRIPT} ${FINAL_ARGS}"
