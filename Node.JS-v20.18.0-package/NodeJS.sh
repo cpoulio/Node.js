@@ -17,7 +17,7 @@
 #deploy_dir='.' # Comment out when deploying with Ansible.
 VERSION='20.18.0'
 NPM_VERSION='10.8.2'
-EMAIL_LIST="christopher.g.pouliot@irs.gov $EMAIL"
+EMAIL_LIST="christopher.g.pouliot@irs.gov${EMAIL:+ $EMAIL}"
 
 ### Variables that Do Not Change Much ######
 SOFTWARENAME='NodeJS'

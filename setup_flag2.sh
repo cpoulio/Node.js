@@ -51,9 +51,13 @@ parse_and_convert_args() {
 # Convert environment variables to flags
 ARG_FLAGS=$(parse_and_convert_args)
 
-# Ensure `--mode` is always included exactly once
 if [[ -z "$CMD_MODE" && ! "$ARG_FLAGS" =~ "--mode" ]]; then
-    ARG_FLAGS="--mode $MODE${EMAIL:+ --email $EMAIL} $ARG_FLAGS"
+    ARG_FLAGS="--mode $MODE"
+fi
+
+# Ensure `--email` is added if provided
+if [[ -n "$EMAIL" ]]; then
+    ARG_FLAGS+=" --email $EMAIL"
 fi
 
 # Combine all arguments (converted environment variables + command-line args)

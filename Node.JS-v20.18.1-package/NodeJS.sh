@@ -17,7 +17,7 @@
 #deploy_dir='.' # Comment out when deploying with Ansible.
 VERSION='20.18.1'
 NPM_VERSION='10.8.2'
-DEFAULT_EMAIL="christopher.g.pouliot@irs.gov"
+EMAIL_LIST="christopher.g.pouliot@irs.gov${EMAIL:+ $EMAIL}"
 
 ### Variables that Do Not Change Much ######
 SOFTWARENAME='NodeJS'
@@ -70,20 +70,7 @@ if [[ ! "$MODE" =~ ^(install|uninstall|update)$ ]]; then
     exit 1
 fi
 
-# Append the default email first
-FINAL_EMAIL="$DEFAULT_EMAIL"
 
-# Append the user-provided email if it exists
-if [[ -n "$EMAIL" ]]; then
-    FINAL_EMAIL+=",${EMAIL}"
-fi
-
-# Remove any spaces, newlines, or control characters
-EMAIL=$(echo "$FINAL_EMAIL" | tr -d '[:space:][:cntrl:]' | tr -d '\r\n')
-
-# Ensure EMAIL is formatted correctly with commas
-EMAIL="${EMAIL// /,}"
-EMAIL="${EMAIL//,,/,}"  # Prevent double commas
 
 
 ## Common Functions ############################################################################################################################################################
@@ -95,7 +82,8 @@ log() {
 send_email() {
     echo 'Sending-email notification...'
     EMAIL_SUBJECT="${HOSTNAME}: ${LOG_FILE} successfully."
-    cat "${LOGDIR}/${LOG_FILE}" | mailx -S replyto=no_reply@irs.gov -s "${EMAIL_SUBJECT}" ${EMAIL}
+    echo "${EMAIL_SUBJECT}" $EMAIL_LIST
+    mailx -s "${EMAIL_SUBJECT}" $EMAIL_LIST < "${LOGDIR}/${LOG_FILE}"
 }
 
 install_YUM_packages() {
