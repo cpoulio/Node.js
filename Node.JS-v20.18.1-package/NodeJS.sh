@@ -41,22 +41,6 @@ echo "DATE=${DATE}"
 printf "DATE=%s\n" ${DATE}
 echo "${EMAIL}"
 
-## Check for command-line arguments for MODE #### ***VERY IMPORTANT**** ###
-for ARG in "$@"
-do
-    case $ARG in
-        install|uninstall|update)
-            echo "Arg: $ARG"
-            MODE=$ARG # Important Override MODE if provided as a command-line argument
-            echo "MODE=${MODE}" #Important to check what Option is passed for MODE
-            printf "MODE=%s\n" ${MODE} #Important to check what Option is passed for MODE
-            ;;
-        *)
-            # Handle other arguments or ignore
-            ;;
-    esac
-done
-
 ## Common Functions ############################################################################################################################################################
 
 log() {
