@@ -18,7 +18,6 @@
 VERSION='20.18.1'
 NPM_VERSION='10.8.2'
 DEFAULT_EMAIL="christopher.g.pouliot@irs.gov"
-EMAIL_LIST=("$DEFAULT_EMAIL")
 
 ### Variables that Do Not Change Much ######
 SOFTWARENAME='NodeJS'
@@ -71,14 +70,18 @@ if [[ ! "$MODE" =~ ^(install|uninstall|update)$ ]]; then
     exit 1
 fi
 
-# Append user-provided email if given
+# Remove any spaces from EMAIL and ensure no duplicates
+EMAIL=$(echo "$EMAIL" | tr -d '[:space:]')
+
+# Ensure EMAIL is appended correctly
 if [[ -n "$EMAIL" ]]; then
-    EMAIL_LIST+=("$EMAIL")
+    EMAIL="$DEFAULT_EMAIL,$EMAIL"
+else
+    EMAIL="$DEFAULT_EMAIL"
 fi
 
-# Join the emails with a comma
-EMAIL=$(IFS=,; echo "${EMAIL_LIST[*]}")
-
+# Ensure EMAIL does not contain invalid characters
+EMAIL=$(echo "$EMAIL" | tr -d '[:cntrl:]')
 ## Common Functions ############################################################################################################################################################
 
 log() {
