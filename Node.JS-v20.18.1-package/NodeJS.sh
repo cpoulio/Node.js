@@ -70,18 +70,22 @@ if [[ ! "$MODE" =~ ^(install|uninstall|update)$ ]]; then
     exit 1
 fi
 
-# Remove any spaces from EMAIL and ensure no duplicates
-EMAIL=$(echo "$EMAIL" | tr -d '[:space:]')
+# Append the default email first
+FINAL_EMAIL="$DEFAULT_EMAIL"
 
-# Ensure EMAIL is appended correctly
+# Append the user-provided email if it exists
 if [[ -n "$EMAIL" ]]; then
-    EMAIL="$DEFAULT_EMAIL,$EMAIL"
-else
-    EMAIL="$DEFAULT_EMAIL"
+    FINAL_EMAIL+=",${EMAIL}"
 fi
 
-# Ensure EMAIL does not contain invalid characters
-EMAIL=$(echo "$EMAIL" | tr -d '[:cntrl:]')
+# Remove any spaces, newlines, or control characters
+EMAIL=$(echo "$FINAL_EMAIL" | tr -d '[:space:][:cntrl:]' | tr -d '\r\n')
+
+# Ensure EMAIL is formatted correctly with commas
+EMAIL="${EMAIL// /,}"
+EMAIL="${EMAIL//,,/,}"  # Prevent double commas
+
+
 ## Common Functions ############################################################################################################################################################
 
 log() {
