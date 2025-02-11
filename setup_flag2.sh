@@ -32,16 +32,14 @@ for ((i = 0; i < ${#CMD_ARGS[@]}; i++)); do
     fi
 done
 
-# Ensure MODE is always set, preferring:
-# 1. Command-line `--mode` if provided
-# 2. Environment variable `MODE`
-# 3. Default to "install"
+# Determine the final MODE value:
+# 1. Use --mode from command-line arguments if provided
+# 2. Use environment variable MODE if set
+# 3. Default to "install" if no mode is set
 if [[ -n "$CMD_MODE" ]]; then
     MODE="$CMD_MODE"
-elif [[ -n "${MODE}" ]]; then  
-    MODE="${MODE}"  # Keep environment value if set
-else
-    MODE="install"  # Default if nothing is set
+elif [[ -z "$MODE" ]]; then
+    MODE="install"
 fi
 
 # Path to the main script
@@ -49,12 +47,12 @@ SCRIPT="${deploy_dir}/NodeJS.sh"  # For Ansible deployment
 #SCRIPT="./NodeJS.sh"  # Uncomment for local testing
 
 # --------------------------------------------
-# FUNCTION: Parse Arguments & Convert `KEY=VALUE` to Flags
+# FUNCTION: Convert `KEY=VALUE` into flags
 # --------------------------------------------
 parse_and_convert_args() {
     FLAGS=""
 
-    # Convert comma-separated list into an array
+    # Convert expected KEY=VALUE environment variables into --flag value format
     IFS=',' read -ra VARS <<< "$EXPECTED_FLAGS"
     
     for VAR in "${VARS[@]}"; do
@@ -68,21 +66,21 @@ parse_and_convert_args() {
     echo "$FLAGS"
 }
 
-# Convert both KEY=VALUE environment variables AND manual flags
+# Convert environment variables to flags
 ARG_FLAGS=$(parse_and_convert_args "$@")
 
-# Ensure there is always exactly **one** `--mode`
-if [[ ! "$ARG_FLAGS" =~ "--mode" && ! "$*" =~ "--mode" ]]; then
+# Ensure `--mode` is included exactly once
+if [[ -z "$CMD_MODE" && ! "$ARG_FLAGS" =~ "--mode" ]]; then
     ARG_FLAGS="--mode $MODE $ARG_FLAGS"
 fi
 
-# Build final arguments (keeping both converted flags and manual CLI input)
-FINAL_ARGS=$(echo "$ARG_FLAGS $*" | xargs)  # Fix extra spaces
+# Combine all arguments (converted environment variables + command-line args)
+FINAL_ARGS=$(echo "$ARG_FLAGS $*" | xargs)  # Remove extra spaces
 
-# Debugging: Print the final command before executing
+# Debugging: Show the exact command being executed
 echo "🔹 Executing: ${SCRIPT} ${FINAL_ARGS}"
 
-# Execute the script correctly
+# Run the main script with correctly formatted arguments
 set -- ${FINAL_ARGS}
 ${SCRIPT} "$@"
 
