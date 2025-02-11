@@ -1,22 +1,5 @@
 #!/bin/bash
 
-###############################################################################################################
-# Description:
-# This script processes arguments for NodeJS installation and activation. It supports:
-# - Named flags (`--mode`, `--email`, etc.)
-# - Environment variables (e.g., `MODE=install EMAIL=admin@example.com`)
-# - Multi-word values
-# - Case insensitivity
-# - Default values when arguments are missing
-# - Arguments in any order
-#
-# ✅ Supports:
-# MODE=install ./setup_flag.sh
-# ./setup_flag.sh --mode install
-# ./setup_flag.sh --mode uninstall
-# ./setup_flag.sh --mode update
-###############################################################################################################
-
 # Define expected flags (uppercase)
 EXPECTED_FLAGS="MODE,EMAIL"
 
@@ -32,13 +15,15 @@ for ((i = 0; i < ${#CMD_ARGS[@]}; i++)); do
     fi
 done
 
-# Determine the final MODE value:
-# 1. Use --mode from command-line arguments if provided
-# 2. Use environment variable MODE if set
+# Ensure MODE is always set, preferring:
+# 1. Command-line `--mode` if provided
+# 2. Environment variable `MODE`
 # 3. Default to "install" if no mode is set
 if [[ -n "$CMD_MODE" ]]; then
     MODE="$CMD_MODE"
-elif [[ -z "$MODE" ]]; then
+elif [[ -n "${MODE}" ]]; then  
+    MODE="${MODE}"  # Keep environment value if set
+else
     MODE="install"
 fi
 
@@ -46,17 +31,13 @@ fi
 SCRIPT="${deploy_dir}/NodeJS.sh"  # For Ansible deployment
 #SCRIPT="./NodeJS.sh"  # Uncomment for local testing
 
-# --------------------------------------------
-# FUNCTION: Convert `KEY=VALUE` into flags
-# --------------------------------------------
+# Convert KEY=VALUE environment variables into flags
 parse_and_convert_args() {
     FLAGS=""
 
-    # Convert expected KEY=VALUE environment variables into --flag value format
     IFS=',' read -ra VARS <<< "$EXPECTED_FLAGS"
-    
     for VAR in "${VARS[@]}"; do
-        VALUE="${!VAR}"  # Get the value of the environment variable
+        VALUE="${!VAR}"  
         if [[ -n "$VALUE" ]]; then
             FLAG_NAME="--$(echo "$VAR" | tr '[:upper:]' '[:lower:]' | tr '_' '-')"
             FLAGS+=" $FLAG_NAME \"$VALUE\""
@@ -67,9 +48,9 @@ parse_and_convert_args() {
 }
 
 # Convert environment variables to flags
-ARG_FLAGS=$(parse_and_convert_args "$@")
+ARG_FLAGS=$(parse_and_convert_args)
 
-# Ensure `--mode` is included exactly once
+# Ensure `--mode` is always included exactly once
 if [[ -z "$CMD_MODE" && ! "$ARG_FLAGS" =~ "--mode" ]]; then
     ARG_FLAGS="--mode $MODE $ARG_FLAGS"
 fi

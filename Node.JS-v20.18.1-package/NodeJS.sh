@@ -41,6 +41,36 @@ echo "DATE=${DATE}"
 printf "DATE=%s\n" ${DATE}
 echo "${EMAIL}"
 
+# Extract command-line arguments
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --mode)
+            MODE="$2"
+            shift 2
+            ;;
+        --email)
+            EMAIL="$2"
+            shift 2
+            ;;
+        *)
+            echo "❌ Invalid argument: $1"
+            exit 1
+            ;;
+    esac
+done
+
+# Ensure MODE is set (default to install if missing)
+if [[ -z "$MODE" ]]; then
+    echo "❌ Error: --mode is required."
+    exit 1
+fi
+
+# Ensure only valid modes are accepted
+if [[ ! "$MODE" =~ ^(install|uninstall|update)$ ]]; then
+    echo "❌ Invalid mode: $MODE. Use --mode install, uninstall, or update."
+    exit 1
+fi
+
 ## Common Functions ############################################################################################################################################################
 
 log() {
