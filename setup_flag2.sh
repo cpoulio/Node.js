@@ -51,9 +51,14 @@ parse_and_convert_args() {
 # Convert environment variables to flags
 ARG_FLAGS=$(parse_and_convert_args)
 
-if [[ -z "$CMD_MODE" && ! "$ARG_FLAGS" =~ "--mode" ]]; then
-    ARG_FLAGS="--mode $MODE"
+# Ensure `--mode` is only included once
+if [[ -n "$CMD_MODE" ]]; then
+    MODE="$CMD_MODE"  # Use command-line mode if provided
+elif [[ -z "$MODE" ]]; then
+    MODE="install"  # Default to install if nothing is set
 fi
+
+ARG_FLAGS="--mode $MODE"
 
 if [[ -n "$EMAIL" && ! "$ARG_FLAGS" =~ "--email" ]]; then
     ARG_FLAGS+=" --email $EMAIL"
