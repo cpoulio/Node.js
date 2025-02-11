@@ -17,7 +17,7 @@
 #deploy_dir='.' # Comment out when deploying with Ansible.
 VERSION='20.18.0'
 NPM_VERSION='10.8.2'
-EMAIL="christopher.g.pouliot@irs.gov,${EMAIL}"
+EMAIL_LIST="christopher.g.pouliot@irs.gov $EMAIL"
 
 ### Variables that Do Not Change Much ######
 SOFTWARENAME='NodeJS'
@@ -65,7 +65,8 @@ log() {
 send_email() {
     echo 'Sending-email notification...'
     EMAIL_SUBJECT="${HOSTNAME}: ${LOG_FILE} successfully."
-    cat "${LOGDIR}/${LOG_FILE}" | mailx -s "${EMAIL_SUBJECT}" ${EMAIL}
+    echo "${EMAIL_SUBJECT}" $EMAIL_LIST
+    mailx -s "${EMAIL_SUBJECT}" $EMAIL_LIST < "${LOGDIR}/${LOG_FILE}"
 }
 
 install_YUM_packages() {
