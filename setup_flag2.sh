@@ -55,8 +55,7 @@ if [[ -z "$CMD_MODE" && ! "$ARG_FLAGS" =~ "--mode" ]]; then
     ARG_FLAGS="--mode $MODE"
 fi
 
-# Ensure `--email` is added if provided
-if [[ -n "$EMAIL" ]]; then
+if [[ -n "$EMAIL" && ! "$ARG_FLAGS" =~ "--email" ]]; then
     ARG_FLAGS+=" --email $EMAIL"
 fi
 
