@@ -2,6 +2,7 @@
 
 # Define expected flags (uppercase)
 EXPECTED_FLAGS="MODE,EMAIL"
+MAIN_SCRIPT="NodeJS.sh"
 
 # Capture command-line arguments
 CMD_ARGS=("$@")
@@ -28,8 +29,8 @@ else
 fi
 
 # Path to the main script
-SCRIPT="${deploy_dir}/NodeJS.sh"  # For Ansible deployment
-#SCRIPT="./NodeJS.sh"  # Uncomment for local testing
+SCRIPT="${deploy_dir}/${MAIN_SCRIPT}"  # For Ansible deployment
+#SCRIPT="./${MAIN_SCRIPT}"  # Uncomment for local testing
 
 # Convert KEY=VALUE environment variables into flags
 parse_and_convert_args() {
