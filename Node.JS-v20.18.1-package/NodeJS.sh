@@ -44,13 +44,15 @@ echo "${EMAIL_LIST}"
 capture_value() {
     local VAR_NAME=$1
     shift
-    local VALUE="$1"
-    shift
-    while [[ -n "$1" && "$1" != --* ]]; do
-        VALUE+=" $1"
+    if [[ -n "$1" && "$1" != --* ]]; then
+        local VALUE="$1"
         shift
-    done
-    eval "$VAR_NAME=\"\$VALUE\""
+        while [[ -n "$1" && "$1" != --* ]]; do
+            VALUE+=" $1"
+            shift
+        done
+        eval "$VAR_NAME=\"\$VALUE\""
+    fi
 }
 
 # Parse Additional Arguments (Case-Insensitive)
