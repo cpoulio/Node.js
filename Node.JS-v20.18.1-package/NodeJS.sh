@@ -39,21 +39,35 @@ echo "DATE=${DATE}"
 printf "DATE=%s\n" ${DATE}
 echo "${EMAIL_LIST}"
 
-# Extract command-line arguments
+
+# Function to capture multi-word values
+capture_value() {
+    local VAR_NAME=$1
+    shift
+    local VALUE="$1"
+    shift
+    while [[ -n "$1" && "$1" != --* ]]; do
+        VALUE+=" $1"
+        shift
+    done
+    eval "$VAR_NAME=\"\$VALUE\""
+}
+
+# Parse Additional Arguments (Case-Insensitive)
 while [[ $# -gt 0 ]]; do
-    case "$1" in
+    ARG="${1,,}"  # Convert argument to lowercase for case insensitivity
+    case "$ARG" in
         --mode)
-            MODE="$2"
-            shift 2
+            capture_value CMD_MODE "$@"
+            shift
             ;;
         --email)
-            if [[ -n "$2" ]]; then
-                EMAIL="$2"
-                shift 2
-            fi
+            capture_value EMAIL "$@"
+            shift
             ;;
         *)
-            echo "❌ Invalid argument: $1"
+            echo "❌ Invalid option: $1"
+            echo "Usage: $0 --mode {install|uninstall|update} [--email <email>]"
             exit 1
             ;;
     esac

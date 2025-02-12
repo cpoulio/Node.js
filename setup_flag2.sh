@@ -55,6 +55,7 @@ done
 if [[ -z "$MODE" ]]; then
     MODE="install"
 fi
+echo "🔹 DEBUG: FINAL ARGUMENTS TO NODEJS.SH: [$MODE]"
 
 # Build FINAL_ARGS
 FINAL_ARGS="--mode $MODE"
