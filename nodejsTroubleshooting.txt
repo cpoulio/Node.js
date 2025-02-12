@@ -1,17 +1,16 @@
 [root@vt2wxapcots0002 Node]# MODE=uninstall ./setup_flag3.sh 
 + MAIN_SCRIPT=NodeJS.sh
 + SCRIPT=./NodeJS.sh
-+ CMD_MODE=
-+ CMD_ARGS=("$@")
 + [[ 0 -gt 0 ]]
-+ [[ -z '' ]]
-+ CMD_MODE=install
-+ FINAL_ARGS='--mode install'
 + [[ -n '' ]]
-+ echo '🔹 Executing: ./NodeJS.sh --mode install'
-🔹 Executing: ./NodeJS.sh --mode install
-+ set -- --mode install
-+ ./NodeJS.sh --mode install
++ [[ -n uninstall ]]
++ MODE=uninstall
++ FINAL_ARGS='--mode '
++ [[ -n '' ]]
++ echo '🔹 Executing: ./NodeJS.sh --mode '
+🔹 Executing: ./NodeJS.sh --mode 
++ set -- --mode
++ ./NodeJS.sh --mode
 + deploy_dir=.
 + VERSION=20.18.1
 + NPM_VERSION=10.8.2
@@ -26,7 +25,7 @@
 + FILEPATH=/usr/local/lib/nodejs/node-v20.18.1-linux-x64/bin
 + YUM_PACKAGES='openssl-devel bzip2-devel libicu-devel gcc-c++ make'
 ++ date '+%Y-%m-%d %H:%M:%S'
-+ DATE='2025-02-12 15:26:39'
++ DATE='2025-02-12 17:02:24'
 + echo 'Deployment Directory=.'
 Deployment Directory=.
 + echo node-v20.18.1-linux-x64
@@ -35,29 +34,23 @@ node-v20.18.1-linux-x64
 /usr/local/lib/nodejs/node-v20.18.1-linux-x64/bin
 + echo v20.18.1
 v20.18.1
-+ echo 'DATE=2025-02-12 15:26:39'
-DATE=2025-02-12 15:26:39
-+ printf 'DATE=%s\n' 2025-02-12 15:26:39
++ echo 'DATE=2025-02-12 17:02:24'
+DATE=2025-02-12 17:02:24
++ printf 'DATE=%s\n' 2025-02-12 17:02:24
 DATE=2025-02-12
-DATE=15:26:39
+DATE=17:02:24
 + echo ''
 
-+ [[ 2 -gt 0 ]]
++ [[ 1 -gt 0 ]]
 + ARG=--mode
 + case "$ARG" in
-+ capture_value CMD_MODE --mode install
++ capture_value CMD_MODE --mode
 + local VAR_NAME=CMD_MODE
 + shift
 + [[ -n --mode ]]
 + [[ --mode != --* ]]
-+ shift
-+ [[ 1 -gt 0 ]]
-+ ARG=install
-+ case "$ARG" in
-+ echo '❌ Invalid option: install'
-❌ Invalid option: install
-+ echo 'Usage: ./NodeJS.sh --mode {install|uninstall|update} [--email <email>]'
-Usage: ./NodeJS.sh --mode {install|uninstall|update} [--email <email>]
++ echo '❌ Missing value for CMD_MODE'
+❌ Missing value for CMD_MODE
 + exit 1
 + echo '✅ NodeJS setup script executed successfully!'
 ✅ NodeJS setup script executed successfully!
