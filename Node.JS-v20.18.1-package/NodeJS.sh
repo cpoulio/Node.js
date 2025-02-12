@@ -40,18 +40,19 @@ printf "DATE=%s\n" ${DATE}
 echo "${EMAIL_LIST}"
 
 
-# Function to capture multi-word values
 capture_value() {
     local VAR_NAME=$1
     shift
     if [[ -n "$1" && "$1" != --* ]]; then
-        local VALUE="$1"
+        eval "$VAR_NAME=\"$1\""  # ✅ Set variable correctly
         shift
         while [[ -n "$1" && "$1" != --* ]]; do
-            VALUE+=" $1"
+            eval "$VAR_NAME+=\" $1\""
             shift
         done
-        eval "$VAR_NAME=\"\$VALUE\""
+    else
+        echo "❌ Missing value for $VAR_NAME"
+        exit 1
     fi
 }
 
@@ -61,11 +62,9 @@ while [[ $# -gt 0 ]]; do
     case "$ARG" in
         --mode)
             capture_value CMD_MODE "$@"
-            shift
             ;;
         --email)
             capture_value EMAIL "$@"
-            shift
             ;;
         *)
             echo "❌ Invalid option: $1"
@@ -74,6 +73,18 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+# Ensure MODE is set in the correct order:
+# 1️⃣ Use `--mode` from command-line if provided
+# 2️⃣ Use `MODE` from environment if set
+# 3️⃣ Default to `install` if neither is set
+if [[ -n "$CMD_MODE" ]]; then
+    MODE="$CMD_MODE"
+elif [[ -n "$MODE" ]]; then
+    MODE="$MODE"  # Keep the environment value
+else
+    MODE="install"
+fi
 
 
 # Ensure MODE is set (default to install if missing)

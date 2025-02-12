@@ -8,24 +8,21 @@ MAIN_SCRIPT="NodeJS.sh"
 SCRIPT="./${MAIN_SCRIPT}"  # Adjust for deployment if needed
 #SCRIPT="./${MAIN_SCRIPT}"  # Uncomment for local testing
 
-# Function to capture multi-word values
 capture_value() {
     local VAR_NAME=$1
     shift
     if [[ -n "$1" && "$1" != --* ]]; then
-        local VALUE="$1"
+        eval "$VAR_NAME=\"$1\""  # ✅ Set variable correctly
         shift
         while [[ -n "$1" && "$1" != --* ]]; do
-            VALUE+=" $1"
+            eval "$VAR_NAME+=\" $1\""
             shift
         done
-        eval "$VAR_NAME=\"\$VALUE\""
+    else
+        echo "❌ Missing value for $VAR_NAME"
+        exit 1
     fi
 }
-
-# Capture command-line arguments
-CMD_MODE=""
-CMD_ARGS=("$@")
 
 # Parse Additional Arguments (Case-Insensitive)
 while [[ $# -gt 0 ]]; do
@@ -33,11 +30,9 @@ while [[ $# -gt 0 ]]; do
     case "$ARG" in
         --mode)
             capture_value CMD_MODE "$@"
-            shift
             ;;
         --email)
             capture_value EMAIL "$@"
-            shift
             ;;
         *)
             echo "❌ Invalid option: $1"
@@ -47,21 +42,23 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Ensure MODE is set, default to install
-if [[ -z "$CMD_MODE" ]]; then
-    CMD_MODE="install"
+# Ensure MODE is set in the correct order:
+# 1️⃣ Use `--mode` from command-line if provided
+# 2️⃣ Use `MODE` from environment if set
+# 3️⃣ Default to `install` if neither is set
+if [[ -n "$CMD_MODE" ]]; then
+    MODE="$CMD_MODE"
+elif [[ -n "$MODE" ]]; then
+    MODE="$MODE"  # Keep the environment value
+else
+    MODE="install"
 fi
-echo "🔹 DEBUG: FINAL ARGUMENTS TO NODEJS.SH: [$CMD_MODE]"
 
 # Build FINAL_ARGS
 FINAL_ARGS="--mode $CMD_MODE"
 if [[ -n "$EMAIL" ]]; then
     FINAL_ARGS+=" --email $EMAIL"
 fi
-
-# Debugging: Print the final command before executing
-echo "🔹 Executing: ./$MAIN_SCRIPT $FINAL_ARGS"
-
 
 # Debugging: Show the exact command being executed
 echo "🔹 Executing: ${SCRIPT} ${FINAL_ARGS}"
