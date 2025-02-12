@@ -1,5 +1,5 @@
 #!/bin/bash
-#set -x
+set -x
 ###############################################################################################################
 
 # Define main script name
@@ -54,12 +54,20 @@ else
     MODE="install"
 fi
 
-# Build FINAL_ARGS
-FINAL_ARGS="--mode $CMD_MODE"
+# Ensure CMD_MODE is set before building FINAL_ARGS
+if [[ -z "$CMD_MODE" ]]; then
+    echo "❌ Error: MODE is missing. Use --mode install, uninstall, or update."
+    exit 1
+fi
+
+# Build FINAL_ARGS only if CMD_MODE has a value
+FINAL_ARGS=""
+if [[ -n "$CMD_MODE" ]]; then
+    FINAL_ARGS="--mode $CMD_MODE"
+fi
 if [[ -n "$EMAIL" ]]; then
     FINAL_ARGS+=" --email $EMAIL"
 fi
-
 # Debugging: Show the exact command being executed
 echo "🔹 Executing: ${SCRIPT} ${FINAL_ARGS}"
 

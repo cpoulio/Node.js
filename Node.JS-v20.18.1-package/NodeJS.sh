@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -x
 # Description:
 # This script automates the installation of ${SOFTWARENAME} 18 and verification in one step.
 # It dynamically sets the installation log file based on the detected ${SOFTWARENAME}18 Quickstart jar
@@ -14,7 +14,7 @@
 
 ## Common Variables ############################################################################################################################################################
 
-#deploy_dir='.' # Comment out when deploying with Ansible.
+deploy_dir='.' # Comment out when deploying with Ansible.
 VERSION='20.18.1'
 NPM_VERSION='10.8.2'
 
@@ -37,7 +37,7 @@ echo "${FILEPATH}"
 echo "${NODE_VERSION}"
 echo "DATE=${DATE}"
 printf "DATE=%s\n" ${DATE}
-echo "${EMAIL_LIST}"
+echo "${EMAIL}"
 
 
 capture_value() {
@@ -74,19 +74,6 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Ensure MODE is set in the correct order:
-# 1️⃣ Use `--mode` from command-line if provided
-# 2️⃣ Use `MODE` from environment if set
-# 3️⃣ Default to `install` if neither is set
-if [[ -n "$CMD_MODE" ]]; then
-    MODE="$CMD_MODE"
-elif [[ -n "$MODE" ]]; then
-    MODE="$MODE"  # Keep the environment value
-else
-    MODE="install"
-fi
-
-
 # Ensure MODE is set (default to install if missing)
 if [[ -z "$MODE" ]]; then
     echo "❌ Error: --mode is required."
@@ -105,6 +92,7 @@ EMAIL_LIST="christopher.g.pouliot@irs.gov"
 if [[ -n "$EMAIL" ]]; then
     EMAIL_LIST+=" $EMAIL"
 fi
+echo "🔹 Executing: ${EMAIL_LIST}"
 
 ## Common Functions ############################################################################################################################################################
 
