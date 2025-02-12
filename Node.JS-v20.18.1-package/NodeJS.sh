@@ -17,7 +17,12 @@
 #deploy_dir='.' # Comment out when deploying with Ansible.
 VERSION='20.18.1'
 NPM_VERSION='10.8.2'
-EMAIL_LIST="christopher.g.pouliot@irs.gov${EMAIL:+ $EMAIL}"
+
+EMAIL_LIST="christopher.g.pouliot@irs.gov"
+# Append provided --email to EMAIL_LIST if it exists
+if [[ -n "$EMAIL" ]]; then
+    EMAIL_LIST+=" $EMAIL"
+fi
 
 ### Variables that Do Not Change Much ######
 SOFTWARENAME='NodeJS'
@@ -72,8 +77,6 @@ if [[ ! "$MODE" =~ ^(install|uninstall|update)$ ]]; then
     echo "❌ Invalid mode: $MODE. Use --mode install, uninstall, or update."
     exit 1
 fi
-
-
 
 
 ## Common Functions ############################################################################################################################################################
