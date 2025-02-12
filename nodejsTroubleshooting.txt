@@ -1,36 +1,24 @@
-[root@vt2wxapcots0002 Node]# ./setup_flag2.sh --mode uninstall --email christopher.g.pouliot@gmail.com
+[root@vt2wxapcots0002 Node]# MODE=uninstall ./setup_flag3.sh 
 + MAIN_SCRIPT=NodeJS.sh
 + SCRIPT=./NodeJS.sh
-+ CMD_ARGS=("$@")
 + CMD_MODE=
-+ (( i = 0 ))
-+ (( i < 4 ))
-+ [[ --mode == \-\-\m\o\d\e ]]
-+ CMD_MODE=uninstall
-+ break
-+ [[ -n uninstall ]]
-+ MODE=uninstall
-+ [[ 4 -gt 0 ]]
-+ case "$1" in
-+ MODE=uninstall
-+ shift 2
-+ [[ 2 -gt 0 ]]
-+ case "$1" in
-+ [[ -n christopher.g.pouliot@gmail.com ]]
-+ EMAIL=christopher.g.pouliot@gmail.com
-+ shift 2
++ CMD_ARGS=("$@")
 + [[ 0 -gt 0 ]]
-+ [[ -z uninstall ]]
-+ FINAL_ARGS='--mode uninstall'
-+ [[ -n christopher.g.pouliot@gmail.com ]]
-+ FINAL_ARGS+=' --email christopher.g.pouliot@gmail.com'
-+ echo '🔹 Executing: ./NodeJS.sh --mode uninstall --email christopher.g.pouliot@gmail.com'
-🔹 Executing: ./NodeJS.sh --mode uninstall --email christopher.g.pouliot@gmail.com
-+ ./NodeJS.sh --mode uninstall --email christopher.g.pouliot@gmail.com
++ [[ -z '' ]]
++ CMD_MODE=install
++ echo '🔹 DEBUG: FINAL ARGUMENTS TO NODEJS.SH: [install]'
+🔹 DEBUG: FINAL ARGUMENTS TO NODEJS.SH: [install]
++ FINAL_ARGS='--mode install'
++ [[ -n '' ]]
++ echo '🔹 Executing: ./NodeJS.sh --mode install'
+🔹 Executing: ./NodeJS.sh --mode install
++ echo '🔹 Executing: ./NodeJS.sh --mode install'
+🔹 Executing: ./NodeJS.sh --mode install
++ set -- --mode install
++ ./NodeJS.sh --mode install
 + deploy_dir=.
 + VERSION=20.18.1
 + NPM_VERSION=10.8.2
-+ EMAIL_LIST=christopher.g.pouliot@irs.gov
 + SOFTWARENAME=NodeJS
 ++ uname -n
 + HOSTNAME=vt2wxapcots0002.dstest.irsnet.gov
@@ -42,7 +30,7 @@
 + FILEPATH=/usr/local/lib/nodejs/node-v20.18.1-linux-x64/bin
 + YUM_PACKAGES='openssl-devel bzip2-devel libicu-devel gcc-c++ make'
 ++ date '+%Y-%m-%d %H:%M:%S'
-+ DATE='2025-02-11 21:32:07'
++ DATE='2025-02-12 15:05:12'
 + echo 'Deployment Directory=.'
 Deployment Directory=.
 + echo node-v20.18.1-linux-x64
@@ -51,282 +39,36 @@ node-v20.18.1-linux-x64
 /usr/local/lib/nodejs/node-v20.18.1-linux-x64/bin
 + echo v20.18.1
 v20.18.1
-+ echo 'DATE=2025-02-11 21:32:07'
-DATE=2025-02-11 21:32:07
-+ printf 'DATE=%s\n' 2025-02-11 21:32:07
-DATE=2025-02-11
-DATE=21:32:07
-+ echo christopher.g.pouliot@irs.gov
-christopher.g.pouliot@irs.gov
-+ [[ 4 -gt 0 ]]
-+ case "$1" in
-+ MODE=uninstall
-+ shift 2
++ echo 'DATE=2025-02-12 15:05:12'
+DATE=2025-02-12 15:05:12
++ printf 'DATE=%s\n' 2025-02-12 15:05:12
+DATE=2025-02-12
+DATE=15:05:12
++ echo ''
+
 + [[ 2 -gt 0 ]]
-+ case "$1" in
-+ [[ -n christopher.g.pouliot@gmail.com ]]
-+ EMAIL=christopher.g.pouliot@gmail.com
-+ shift 2
-+ [[ 0 -gt 0 ]]
-+ [[ -z uninstall ]]
-+ [[ ! uninstall =~ ^(install|uninstall|update)$ ]]
-+ case ${MODE} in
-+ uninstall
-+ log 'Starting Uninstall NodeJS Function'
-+ echo '2025-02-11 21:32:07 - Starting Uninstall NodeJS Function'
-+ tee -a /tmp/
-tee: /tmp/: Is a directory
-2025-02-11 21:32:07 - Starting Uninstall NodeJS Function
-+ ACTION_PERFORMED=Uninstall
-+ LOG_FILE='node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:07.log'
-+ rm -Rf /usr/local/lib/nodejs
-+ rm -Rf '/usr/local/lib/node*'
-+ rm -Rf '/usr/local/bin/node*'
-+ rm -Rf '/usr/local/bin/npm*'
-+ rm -Rf '/usr/local/bin/npx*'
-++ which node
-++ alias
-++ eval declare -f
-+++ declare -f
-++ /usr/bin/which --tty-only --read-alias --read-functions --show-tilde --show-dot node
-/usr/bin/which: no node in (/root/.local/bin:/root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin)
-+ NODE_PATH=
-+ '[' -n '' ']'
-+ log 'NodeJS installed not found.'
-+ echo '2025-02-11 21:32:07 - NodeJS installed not found.'
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:07.log'
-2025-02-11 21:32:07 - NodeJS installed not found.
-++ dirname ''
-+ NODE_BIN_DIR=.
-+ '[' -d . ']'
-+ rm -rf .
-rm: refusing to remove '.' or '..' directory: skipping '.'
-+ log 'Failed to remove ..'
-+ echo '2025-02-11 21:32:07 - Failed to remove ..'
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:07.log'
-2025-02-11 21:32:07 - Failed to remove ..
-+ rm -f /usr/local/bin/npx
-+ log 'NodeJS npx file removed.'
-+ echo '2025-02-11 21:32:07 - NodeJS npx file removed.'
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:07.log'
-2025-02-11 21:32:07 - NodeJS npx file removed.
-+ rm -f /usr/local/bin/npm
-+ log 'NodeJS npm file removed.'
-+ echo '2025-02-11 21:32:07 - NodeJS npm file removed.'
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:07.log'
-2025-02-11 21:32:07 - NodeJS npm file removed.
-+ rm -f /usr/local/bin/node
-+ log 'NodeJS node file removed.'
-+ echo '2025-02-11 21:32:07 - NodeJS node file removed.'
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:07.log'
-2025-02-11 21:32:07 - NodeJS node file removed.
-+ backup_and_remove_old_paths
-+ log 'Backing up and removing old paths from profile files...'
-+ echo '2025-02-11 21:32:07 - Backing up and removing old paths from profile files...'
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:07.log'
-2025-02-11 21:32:07 - Backing up and removing old paths from profile files...
-+ for PROFILE in ~/.bash_profile ~/.profile ~/.bashrc ~/.zshrc
-+ '[' -f /root/.bash_profile ']'
-+ cp -p /root/.bash_profile /root/.bash_profile.bak
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:07.log'
-+ log '/root/.bash_profile backed up'
-+ echo '2025-02-11 21:32:07 - /root/.bash_profile backed up'
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:07.log'
-2025-02-11 21:32:07 - /root/.bash_profile backed up
-+ sed -i '/\/usr\/local\/lib\/nodejs\/node-v.*\/bin/d' /root/.bash_profile
-+ sed -i '/export PATH=.:$PATH/d' /root/.bash_profile
-+ log '/root/.bash_profile updated to remove old paths'
-+ echo '2025-02-11 21:32:07 - /root/.bash_profile updated to remove old paths'
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:07.log'
-2025-02-11 21:32:07 - /root/.bash_profile updated to remove old paths
-+ for PROFILE in ~/.bash_profile ~/.profile ~/.bashrc ~/.zshrc
-+ '[' -f /root/.profile ']'
-+ for PROFILE in ~/.bash_profile ~/.profile ~/.bashrc ~/.zshrc
-+ '[' -f /root/.bashrc ']'
-+ cp -p /root/.bashrc /root/.bashrc.bak
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:07.log'
-+ log '/root/.bashrc backed up'
-+ echo '2025-02-11 21:32:07 - /root/.bashrc backed up'
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:07.log'
-2025-02-11 21:32:07 - /root/.bashrc backed up
-+ sed -i '/\/usr\/local\/lib\/nodejs\/node-v.*\/bin/d' /root/.bashrc
-+ sed -i '/export PATH=.:$PATH/d' /root/.bashrc
-+ log '/root/.bashrc updated to remove old paths'
-+ echo '2025-02-11 21:32:07 - /root/.bashrc updated to remove old paths'
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:07.log'
-2025-02-11 21:32:07 - /root/.bashrc updated to remove old paths
-+ for PROFILE in ~/.bash_profile ~/.profile ~/.bashrc ~/.zshrc
-+ '[' -f /root/.zshrc ']'
-+ log 'NodeJS removed cleanly.'
-+ echo '2025-02-11 21:32:07 - NodeJS removed cleanly.'
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:07.log'
-2025-02-11 21:32:07 - NodeJS removed cleanly.
-+ log 'Uninstall completed.'
-+ echo '2025-02-11 21:32:07 - Uninstall completed.'
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:07.log'
-2025-02-11 21:32:07 - Uninstall completed.
-+ send_email
-+ echo 'Sending-email notification...'
-Sending-email notification...
-+ EMAIL_SUBJECT='vt2wxapcots0002.dstest.irsnet.gov: node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:07.log successfully.'
-+ echo '🔹 Executing: vt2wxapcots0002.dstest.irsnet.gov: node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:07.log successfully.' christopher.g.pouliot@irs.gov
-🔹 Executing: vt2wxapcots0002.dstest.irsnet.gov: node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:07.log successfully. christopher.g.pouliot@irs.gov
-+ echo '🔹 DEBUG: FINAL EMAIL LIST BEFORE MAILX: [christopher.g.pouliot@irs.gov]'
-🔹 DEBUG: FINAL EMAIL LIST BEFORE MAILX: [christopher.g.pouliot@irs.gov]
-+ mailx -s 'vt2wxapcots0002.dstest.irsnet.gov: node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:07.log successfully.' christopher.g.pouliot@irs.gov
-+ echo '🔹 Executing: ./NodeJS.sh --mode uninstall --email christopher.g.pouliot@gmail.com'
-🔹 Executing: ./NodeJS.sh --mode uninstall --email christopher.g.pouliot@gmail.com
-+ echo '🔹 DEBUG: FINAL ARGUMENTS TO NODEJS.SH: []'
-🔹 DEBUG: FINAL ARGUMENTS TO NODEJS.SH: []
-+ set -- --mode uninstall --email christopher.g.pouliot@gmail.com
-+ ./NodeJS.sh --mode uninstall --email christopher.g.pouliot@gmail.com
-+ deploy_dir=.
-+ VERSION=20.18.1
-+ NPM_VERSION=10.8.2
-+ EMAIL_LIST=christopher.g.pouliot@irs.gov
-+ SOFTWARENAME=NodeJS
-++ uname -n
-+ HOSTNAME=vt2wxapcots0002.dstest.irsnet.gov
-+ INSTALLDIR=/usr/local/lib/nodejs
-+ LOGDIR=/tmp
-+ NODE_VERSION=v20.18.1
-+ LINUX_DISTRO=linux-x64
-+ NODEJSFILE=node-v20.18.1-linux-x64
-+ FILEPATH=/usr/local/lib/nodejs/node-v20.18.1-linux-x64/bin
-+ YUM_PACKAGES='openssl-devel bzip2-devel libicu-devel gcc-c++ make'
-++ date '+%Y-%m-%d %H:%M:%S'
-+ DATE='2025-02-11 21:32:08'
-+ echo 'Deployment Directory=.'
-Deployment Directory=.
-+ echo node-v20.18.1-linux-x64
-node-v20.18.1-linux-x64
-+ echo /usr/local/lib/nodejs/node-v20.18.1-linux-x64/bin
-/usr/local/lib/nodejs/node-v20.18.1-linux-x64/bin
-+ echo v20.18.1
-v20.18.1
-+ echo 'DATE=2025-02-11 21:32:08'
-DATE=2025-02-11 21:32:08
-+ printf 'DATE=%s\n' 2025-02-11 21:32:08
-DATE=2025-02-11
-DATE=21:32:08
-+ echo christopher.g.pouliot@irs.gov
-christopher.g.pouliot@irs.gov
-+ [[ 4 -gt 0 ]]
-+ case "$1" in
-+ MODE=uninstall
-+ shift 2
-+ [[ 2 -gt 0 ]]
-+ case "$1" in
-+ [[ -n christopher.g.pouliot@gmail.com ]]
-+ EMAIL=christopher.g.pouliot@gmail.com
-+ shift 2
-+ [[ 0 -gt 0 ]]
-+ [[ -z uninstall ]]
-+ [[ ! uninstall =~ ^(install|uninstall|update)$ ]]
-+ case ${MODE} in
-+ uninstall
-+ log 'Starting Uninstall NodeJS Function'
-+ echo '2025-02-11 21:32:08 - Starting Uninstall NodeJS Function'
-+ tee -a /tmp/
-tee: /tmp/: Is a directory
-2025-02-11 21:32:08 - Starting Uninstall NodeJS Function
-+ ACTION_PERFORMED=Uninstall
-+ LOG_FILE='node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:08.log'
-+ rm -Rf /usr/local/lib/nodejs
-+ rm -Rf '/usr/local/lib/node*'
-+ rm -Rf '/usr/local/bin/node*'
-+ rm -Rf '/usr/local/bin/npm*'
-+ rm -Rf '/usr/local/bin/npx*'
-++ which node
-++ alias
-++ eval declare -f
-+++ declare -f
-++ /usr/bin/which --tty-only --read-alias --read-functions --show-tilde --show-dot node
-/usr/bin/which: no node in (/root/.local/bin:/root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin)
-+ NODE_PATH=
-+ '[' -n '' ']'
-+ log 'NodeJS installed not found.'
-+ echo '2025-02-11 21:32:08 - NodeJS installed not found.'
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:08.log'
-2025-02-11 21:32:08 - NodeJS installed not found.
-++ dirname ''
-+ NODE_BIN_DIR=.
-+ '[' -d . ']'
-+ rm -rf .
-rm: refusing to remove '.' or '..' directory: skipping '.'
-+ log 'Failed to remove ..'
-+ echo '2025-02-11 21:32:08 - Failed to remove ..'
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:08.log'
-2025-02-11 21:32:08 - Failed to remove ..
-+ rm -f /usr/local/bin/npx
-+ log 'NodeJS npx file removed.'
-+ echo '2025-02-11 21:32:08 - NodeJS npx file removed.'
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:08.log'
-2025-02-11 21:32:08 - NodeJS npx file removed.
-+ rm -f /usr/local/bin/npm
-+ log 'NodeJS npm file removed.'
-+ echo '2025-02-11 21:32:08 - NodeJS npm file removed.'
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:08.log'
-2025-02-11 21:32:08 - NodeJS npm file removed.
-+ rm -f /usr/local/bin/node
-+ log 'NodeJS node file removed.'
-+ echo '2025-02-11 21:32:08 - NodeJS node file removed.'
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:08.log'
-2025-02-11 21:32:08 - NodeJS node file removed.
-+ backup_and_remove_old_paths
-+ log 'Backing up and removing old paths from profile files...'
-+ echo '2025-02-11 21:32:08 - Backing up and removing old paths from profile files...'
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:08.log'
-2025-02-11 21:32:08 - Backing up and removing old paths from profile files...
-+ for PROFILE in ~/.bash_profile ~/.profile ~/.bashrc ~/.zshrc
-+ '[' -f /root/.bash_profile ']'
-+ cp -p /root/.bash_profile /root/.bash_profile.bak
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:08.log'
-+ log '/root/.bash_profile backed up'
-+ echo '2025-02-11 21:32:08 - /root/.bash_profile backed up'
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:08.log'
-2025-02-11 21:32:08 - /root/.bash_profile backed up
-+ sed -i '/\/usr\/local\/lib\/nodejs\/node-v.*\/bin/d' /root/.bash_profile
-+ sed -i '/export PATH=.:$PATH/d' /root/.bash_profile
-+ log '/root/.bash_profile updated to remove old paths'
-+ echo '2025-02-11 21:32:08 - /root/.bash_profile updated to remove old paths'
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:08.log'
-2025-02-11 21:32:08 - /root/.bash_profile updated to remove old paths
-+ for PROFILE in ~/.bash_profile ~/.profile ~/.bashrc ~/.zshrc
-+ '[' -f /root/.profile ']'
-+ for PROFILE in ~/.bash_profile ~/.profile ~/.bashrc ~/.zshrc
-+ '[' -f /root/.bashrc ']'
-+ cp -p /root/.bashrc /root/.bashrc.bak
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:08.log'
-+ log '/root/.bashrc backed up'
-+ echo '2025-02-11 21:32:08 - /root/.bashrc backed up'
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:08.log'
-2025-02-11 21:32:08 - /root/.bashrc backed up
-+ sed -i '/\/usr\/local\/lib\/nodejs\/node-v.*\/bin/d' /root/.bashrc
-+ sed -i '/export PATH=.:$PATH/d' /root/.bashrc
-+ log '/root/.bashrc updated to remove old paths'
-+ echo '2025-02-11 21:32:08 - /root/.bashrc updated to remove old paths'
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:08.log'
-2025-02-11 21:32:08 - /root/.bashrc updated to remove old paths
-+ for PROFILE in ~/.bash_profile ~/.profile ~/.bashrc ~/.zshrc
-+ '[' -f /root/.zshrc ']'
-+ log 'NodeJS removed cleanly.'
-+ echo '2025-02-11 21:32:08 - NodeJS removed cleanly.'
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:08.log'
-2025-02-11 21:32:08 - NodeJS removed cleanly.
-+ log 'Uninstall completed.'
-+ echo '2025-02-11 21:32:08 - Uninstall completed.'
-+ tee -a '/tmp/node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:08.log'
-2025-02-11 21:32:08 - Uninstall completed.
-+ send_email
-+ echo 'Sending-email notification...'
-Sending-email notification...
-+ EMAIL_SUBJECT='vt2wxapcots0002.dstest.irsnet.gov: node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:08.log successfully.'
-+ echo '🔹 Executing: vt2wxapcots0002.dstest.irsnet.gov: node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:08.log successfully.' christopher.g.pouliot@irs.gov
-🔹 Executing: vt2wxapcots0002.dstest.irsnet.gov: node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:08.log successfully. christopher.g.pouliot@irs.gov
-+ echo '🔹 DEBUG: FINAL EMAIL LIST BEFORE MAILX: [christopher.g.pouliot@irs.gov]'
-🔹 DEBUG: FINAL EMAIL LIST BEFORE MAILX: [christopher.g.pouliot@irs.gov]
-+ mailx -s 'vt2wxapcots0002.dstest.irsnet.gov: node-v20.18.1-linux-x64-Uninstall-2025-02-11 21:32:08.log successfully.' christopher.g.pouliot@irs.gov
++ ARG=--mode
++ case "$ARG" in
++ capture_value CMD_MODE --mode install
++ local VAR_NAME=CMD_MODE
++ shift
++ local VALUE=--mode
++ shift
++ [[ -n install ]]
++ [[ install != --* ]]
++ VALUE+=' install'
++ shift
++ [[ -n '' ]]
++ eval 'CMD_MODE="$VALUE"'
+++ CMD_MODE='--mode install'
++ shift
++ [[ 1 -gt 0 ]]
++ ARG=install
++ case "$ARG" in
++ echo '❌ Invalid option: install'
+❌ Invalid option: install
++ echo 'Usage: ./NodeJS.sh --mode {install|uninstall|update} [--email <email>]'
+Usage: ./NodeJS.sh --mode {install|uninstall|update} [--email <email>]
++ exit 1
 + echo '✅ NodeJS setup script executed successfully!'
 ✅ NodeJS setup script executed successfully!
-[root@vt2wxapcots0002 Node]# 
