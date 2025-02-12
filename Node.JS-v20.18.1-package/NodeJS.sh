@@ -18,12 +18,6 @@
 VERSION='20.18.1'
 NPM_VERSION='10.8.2'
 
-EMAIL_LIST="christopher.g.pouliot@irs.gov"
-# Append provided --email to EMAIL_LIST if it exists
-if [[ -n "$EMAIL" ]]; then
-    EMAIL_LIST+=" $EMAIL"
-fi
-
 ### Variables that Do Not Change Much ######
 SOFTWARENAME='NodeJS'
 HOSTNAME="$(uname -n)"
@@ -78,6 +72,12 @@ if [[ ! "$MODE" =~ ^(install|uninstall|update)$ ]]; then
     exit 1
 fi
 
+# Set EMAIL_LIST after extracting --email
+EMAIL_LIST="christopher.g.pouliot@irs.gov"
+# Append provided --email to EMAIL_LIST if it exists
+if [[ -n "$EMAIL" ]]; then
+    EMAIL_LIST+=" $EMAIL"
+fi
 
 ## Common Functions ############################################################################################################################################################
 
