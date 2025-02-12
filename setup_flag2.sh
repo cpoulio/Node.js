@@ -51,18 +51,18 @@ parse_and_convert_args() {
 # Convert environment variables to flags
 ARG_FLAGS=$(parse_and_convert_args)
 
-# Ensure `--mode` is only included once
+# Initialize ARG_FLAGS properly
 if [[ -z "$CMD_MODE" ]]; then
     CMD_MODE="$MODE"
 fi
 
-# Initialize ARG_FLAGS properly
+# Ensure `--mode` is only added once
 if [[ ! "$ARG_FLAGS" =~ "--mode" ]]; then
     ARG_FLAGS="--mode $CMD_MODE $ARG_FLAGS"
 fi
 
-# Ensure `--email` is only included once
-if [[ -n "$EMAIL" && ! "$ARG_FLAGS" =~ "--email" ]]; then
+# Ensure `--email` is only added once
+if [[ -n "$EMAIL" && "$ARG_FLAGS" != *"--email"* ]]; then
     ARG_FLAGS+=" --email $EMAIL"
 fi
 
