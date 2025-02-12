@@ -6,12 +6,8 @@
 + [[ 0 -gt 0 ]]
 + [[ -z '' ]]
 + CMD_MODE=install
-+ echo '🔹 DEBUG: FINAL ARGUMENTS TO NODEJS.SH: [install]'
-🔹 DEBUG: FINAL ARGUMENTS TO NODEJS.SH: [install]
 + FINAL_ARGS='--mode install'
 + [[ -n '' ]]
-+ echo '🔹 Executing: ./NodeJS.sh --mode install'
-🔹 Executing: ./NodeJS.sh --mode install
 + echo '🔹 Executing: ./NodeJS.sh --mode install'
 🔹 Executing: ./NodeJS.sh --mode install
 + set -- --mode install
@@ -30,7 +26,7 @@
 + FILEPATH=/usr/local/lib/nodejs/node-v20.18.1-linux-x64/bin
 + YUM_PACKAGES='openssl-devel bzip2-devel libicu-devel gcc-c++ make'
 ++ date '+%Y-%m-%d %H:%M:%S'
-+ DATE='2025-02-12 15:05:12'
++ DATE='2025-02-12 15:26:39'
 + echo 'Deployment Directory=.'
 Deployment Directory=.
 + echo node-v20.18.1-linux-x64
@@ -39,11 +35,11 @@ node-v20.18.1-linux-x64
 /usr/local/lib/nodejs/node-v20.18.1-linux-x64/bin
 + echo v20.18.1
 v20.18.1
-+ echo 'DATE=2025-02-12 15:05:12'
-DATE=2025-02-12 15:05:12
-+ printf 'DATE=%s\n' 2025-02-12 15:05:12
++ echo 'DATE=2025-02-12 15:26:39'
+DATE=2025-02-12 15:26:39
++ printf 'DATE=%s\n' 2025-02-12 15:26:39
 DATE=2025-02-12
-DATE=15:05:12
+DATE=15:26:39
 + echo ''
 
 + [[ 2 -gt 0 ]]
@@ -52,15 +48,8 @@ DATE=15:05:12
 + capture_value CMD_MODE --mode install
 + local VAR_NAME=CMD_MODE
 + shift
-+ local VALUE=--mode
-+ shift
-+ [[ -n install ]]
-+ [[ install != --* ]]
-+ VALUE+=' install'
-+ shift
-+ [[ -n '' ]]
-+ eval 'CMD_MODE="$VALUE"'
-++ CMD_MODE='--mode install'
++ [[ -n --mode ]]
++ [[ --mode != --* ]]
 + shift
 + [[ 1 -gt 0 ]]
 + ARG=install
