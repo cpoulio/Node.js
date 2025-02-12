@@ -38,7 +38,7 @@ echo "${FILEPATH}"
 echo "${NODE_VERSION}"
 echo "DATE=${DATE}"
 printf "DATE=%s\n" ${DATE}
-echo "${EMAIL}"
+echo "${EMAIL_LIST}"
 
 # Extract command-line arguments
 while [[ $# -gt 0 ]]; do
@@ -48,8 +48,10 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --email)
-            EMAIL="$2"
-            shift 2
+            if [[ -n "$2" ]]; then
+                EMAIL="$2"
+                shift 2
+            fi
             ;;
         *)
             echo "❌ Invalid argument: $1"
@@ -57,6 +59,7 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
 
 # Ensure MODE is set (default to install if missing)
 if [[ -z "$MODE" ]]; then
@@ -82,7 +85,8 @@ log() {
 send_email() {
     echo 'Sending-email notification...'
     EMAIL_SUBJECT="${HOSTNAME}: ${LOG_FILE} successfully."
-    echo "${EMAIL_SUBJECT}" $EMAIL_LIST
+    echo "🔹 Executing: ${EMAIL_SUBJECT}" $EMAIL_LIST
+    echo "🔹 DEBUG: FINAL EMAIL LIST BEFORE MAILX: [$EMAIL_LIST]"
     mailx -s "${EMAIL_SUBJECT}" $EMAIL_LIST < "${LOGDIR}/${LOG_FILE}"
 }
 

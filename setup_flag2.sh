@@ -52,8 +52,13 @@ parse_and_convert_args() {
 ARG_FLAGS=$(parse_and_convert_args)
 
 # Ensure `--mode` is only included once
+if [[ -z "$CMD_MODE" ]]; then
+    CMD_MODE="$MODE"
+fi
+
+# Initialize ARG_FLAGS properly
 if [[ ! "$ARG_FLAGS" =~ "--mode" ]]; then
-    ARG_FLAGS="--mode $MODE $ARG_FLAGS"
+    ARG_FLAGS="--mode $CMD_MODE $ARG_FLAGS"
 fi
 
 # Ensure `--email` is only included once
@@ -66,7 +71,7 @@ FINAL_ARGS=$(echo "$ARG_FLAGS $*" | xargs)  # Remove extra spaces
 
 # Debugging: Show the exact command being executed
 echo "🔹 Executing: ${SCRIPT} ${FINAL_ARGS}"
-
+echo "🔹 DEBUG: FINAL ARGUMENTS TO NODEJS.SH: [$ARG_FLAGS]"
 # Run the main script with correctly formatted arguments
 set -- ${FINAL_ARGS}
 ${SCRIPT} "$@"
