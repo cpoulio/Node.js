@@ -1,8 +1,11 @@
 #!/bin/bash
 
-# Define expected flags (uppercase)
-EXPECTED_FLAGS="MODE,EMAIL"
+###############################################################################################################
 MAIN_SCRIPT="NodeJS.sh"
+
+# Path to the main script
+SCRIPT="${deploy_dir}/${MAIN_SCRIPT}"  # For Ansible deployment
+#SCRIPT="./${MAIN_SCRIPT}"  # Uncomment for local testing
 
 # Capture command-line arguments
 CMD_ARGS=("$@")
@@ -28,46 +31,42 @@ else
     MODE="install"
 fi
 
-# Path to the main script
-SCRIPT="${deploy_dir}/${MAIN_SCRIPT}"  # For Ansible deployment
-#SCRIPT="./${MAIN_SCRIPT}"  # Uncomment for local testing
+# Extract command-line arguments
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --mode)
+            MODE="$2"
+            shift 2
+            ;;
+        --email)
+            if [[ -n "$2" ]]; then
+                EMAIL="$2"
+                shift 2
+            fi
+            ;;
+        *)
+            echo "❌ Invalid argument: $1"
+            exit 1
+            ;;
+    esac
+done
 
-# Convert KEY=VALUE environment variables into flags
-parse_and_convert_args() {
-    FLAGS=""
-
-    IFS=',' read -ra VARS <<< "$EXPECTED_FLAGS"
-    for VAR in "${VARS[@]}"; do
-        VALUE="${!VAR}"  
-        if [[ -n "$VALUE" ]]; then
-            FLAG_NAME="--$(echo "$VAR" | tr '[:upper:]' '[:lower:]' | tr '_' '-')"
-            FLAGS+=" $FLAG_NAME \"$VALUE\""
-        fi
-    done
-
-    echo "$FLAGS"
-}
-
-# Convert environment variables to flags
-ARG_FLAGS=$(parse_and_convert_args)
-
-# Initialize ARG_FLAGS properly
-if [[ -z "$CMD_MODE" ]]; then
-    CMD_MODE="$MODE"
+# Ensure MODE is set, default to install
+if [[ -z "$MODE" ]]; then
+    MODE="install"
 fi
 
-# Ensure `--mode` is only added once
-if [[ ! "$ARG_FLAGS" =~ "--mode" ]]; then
-    ARG_FLAGS="--mode $CMD_MODE $ARG_FLAGS"
+# Build FINAL_ARGS
+FINAL_ARGS="--mode $MODE"
+if [[ -n "$EMAIL" ]]; then
+    FINAL_ARGS+=" --email $EMAIL"
 fi
 
-# Ensure `--email` is only added once
-if [[ -n "$EMAIL" && "$ARG_FLAGS" != *"--email"* ]]; then
-    ARG_FLAGS+=" --email $EMAIL"
-fi
+# Debugging: Print the final command before executing
+echo "🔹 Executing: ./$MAIN_SCRIPT $FINAL_ARGS"
 
-# Combine all arguments (converted environment variables + command-line args)
-FINAL_ARGS=$(echo "$ARG_FLAGS $*" | xargs)  # Remove extra spaces
+# Execute the script
+./$MAIN_SCRIPT $FINAL_ARGS
 
 # Debugging: Show the exact command being executed
 echo "🔹 Executing: ${SCRIPT} ${FINAL_ARGS}"
