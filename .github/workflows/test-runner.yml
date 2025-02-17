@@ -1,0 +1,15 @@
+name: Test Self-Hosted Runner
+
+on:
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  test:
+    runs-on: self-hosted  # This ensures it runs on your RHEL 8.9 VM
+    steps:
+      - name: Print Runner Info
+        run: |
+          echo "This job is running on a self-hosted RHEL 8.9 runner."
+          uname -a
+          whoami
+          df -h
