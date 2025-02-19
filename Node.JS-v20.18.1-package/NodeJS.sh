@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+#set -x
 # Description:
 # This script automates the installation of ${SOFTWARENAME} 18 and verification in one step.
 # It dynamically sets the installation log file based on the detected ${SOFTWARENAME}18 Quickstart jar
@@ -14,7 +14,7 @@ set -x
 
 ## Common Variables ############################################################################################################################################################
 
-deploy_dir='.' # Comment out when deploying with Ansible.
+#deploy_dir='.' # Comment out when deploying with Ansible.
 VERSION='20.18.1'
 NPM_VERSION='10.8.2'
 
@@ -37,42 +37,28 @@ echo "${FILEPATH}"
 echo "${NODE_VERSION}"
 echo "DATE=${DATE}"
 printf "DATE=%s\n" ${DATE}
-echo "${EMAIL}"
+echo "${EMAIL_LIST}"
 
-
-capture_value() {
-    local VAR_NAME=$1
-    shift
-    if [[ -n "$1" && "$1" != --* ]]; then
-        eval "$VAR_NAME=\"$1\""  # ✅ Set variable correctly
-        shift
-        while [[ -n "$1" && "$1" != --* ]]; do
-            eval "$VAR_NAME+=\" $1\""
-            shift
-        done
-    else
-        echo "❌ Missing value for $VAR_NAME"
-        exit 1
-    fi
-}
-
-# Parse Additional Arguments (Case-Insensitive)
+# Extract command-line arguments
 while [[ $# -gt 0 ]]; do
-    ARG="${1,,}"  # Convert argument to lowercase for case insensitivity
-    case "$ARG" in
+    case "$1" in
         --mode)
-            capture_value CMD_MODE "$@"
+            MODE="$2"
+            shift 2
             ;;
         --email)
-            capture_value EMAIL "$@"
+            if [[ -n "$2" ]]; then
+                EMAIL="$2"
+                shift 2
+            fi
             ;;
         *)
-            echo "❌ Invalid option: $1"
-            echo "Usage: $0 --mode {install|uninstall|update} [--email <email>]"
+            echo "❌ Invalid argument: $1"
             exit 1
             ;;
     esac
 done
+
 
 # Ensure MODE is set (default to install if missing)
 if [[ -z "$MODE" ]]; then
@@ -92,7 +78,6 @@ EMAIL_LIST="christopher.g.pouliot@irs.gov"
 if [[ -n "$EMAIL" ]]; then
     EMAIL_LIST+=" $EMAIL"
 fi
-echo "🔹 Executing: ${EMAIL_LIST}"
 
 ## Common Functions ############################################################################################################################################################
 
