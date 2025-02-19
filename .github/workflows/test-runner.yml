@@ -13,3 +13,4 @@ jobs:
           uname -a
           whoami
           df -h
+          uptime
