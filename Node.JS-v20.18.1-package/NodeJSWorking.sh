@@ -73,7 +73,7 @@ if [[ ! "$MODE" =~ ^(install|uninstall|update)$ ]]; then
 fi
 
 # Set EMAIL_LIST after extracting --email
-EMAIL_LIST="christopher.g.pouliot@irs.gov"
+EMAIL_LIST="christopher.g.pouliot@email.com"
 # Append provided --email to EMAIL_LIST if it exists
 if [[ -n "$EMAIL" ]]; then
     EMAIL_LIST+=" $EMAIL"
