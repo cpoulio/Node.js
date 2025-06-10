@@ -263,12 +263,42 @@ install() {
 
 }
 
-### Uninstall ############################################################################################################################################################
-
+### Safe Uninstall ############################################################################################################################################################
 uninstall() {
-
-    log "Starting Uninstall ${SOFTWARENAME} Function"
+    log "Starting Safe Uninstall ${SOFTWARENAME} Function"
     ACTION_PERFORMED='Uninstall'
+    LOG_FILE="node-${NODE_VERSION}-${LINUX_DISTRO}-${ACTION_PERFORMED}-${DATE}.log"
+
+    # Remove only the installed version
+    if [ -d "${INSTALLDIR}/${NODEJSFILE}" ]; then
+        rm -rf "${INSTALLDIR:?}/${NODEJSFILE}" && log "${SOFTWARENAME} ${NODEJSFILE} directory removed."
+    else
+        log "${SOFTWARENAME} ${NODEJSFILE} directory not found."
+    fi
+
+    # Remove symlinks only if they point to our install
+    for bin in node npm npx; do
+        BIN_PATH="/usr/local/bin/$bin"
+        if [ -L "$BIN_PATH" ]; then
+            TARGET=$(readlink "$BIN_PATH")
+            if [[ "$TARGET" == "${INSTALLDIR}/${NODEJSFILE}/bin/$bin" ]]; then
+                rm -f "$BIN_PATH" && log "$bin symlink removed from /usr/local/bin."
+            fi
+        fi
+    done
+
+    backup_and_remove_old_paths
+
+    log "${SOFTWARENAME} safely removed."
+    log "Uninstall completed."
+    send_email
+}
+
+### Aggressive Uninstall (Uninstall All) ######################################################################################################################################
+
+uninstall_all() {
+    log "Starting Aggressive Uninstall (Uninstall All) ${SOFTWARENAME} Function"
+    ACTION_PERFORMED='UninstallAll'
     LOG_FILE="node-${NODE_VERSION}-${LINUX_DISTRO}-${ACTION_PERFORMED}-${DATE}.log"
 
     rm -Rf ${INSTALLDIR}
@@ -309,11 +339,9 @@ uninstall() {
 
     backup_and_remove_old_paths
 
-    log "${SOFTWARENAME} removed cleanly."
-    log "Uninstall completed."
-
+    log "All Node.js versions and symlinks removed."
+    log "Uninstall All completed."
     send_email
-
 }
 
 ### Update ############################################################################################################################################################
@@ -341,6 +369,7 @@ update() {
 case ${MODE} in
     install) install ;;
     uninstall) uninstall ;;
+    uninstall_all) uninstall_all ;;
     update) update ;;
-    *) echo "Invalid mode. Usage: MODE=(install|uninstall|update)" ; exit 1 ;;
+    *) echo "Invalid mode. Usage: MODE=(install|uninstall|uninstall_all|update)" ; exit 1 ;;
 esac
