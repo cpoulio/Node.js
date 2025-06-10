@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+#set -x
 # Description:
 # This script automates the installation of ${SOFTWARENAME} 18 and verification in one step.
 # It dynamically sets the installation log file based on the detected ${SOFTWARENAME}18 Quickstart jar
@@ -9,12 +9,12 @@ set -x
 # To install and verify ${SOFTWARENAME}18, place the ${SOFTWARENAME}18.tar.xz and the license properties file in the same directory as this script and run: ./${SOFTWARENAME}.sh install
 # To uninstall NodeJS, run: ./Nodejs.sh uninstall
 # To update NodeJS, run: ./Nodejs.sh update
-# To add Email address NodeJS, run: ./Nodejs.sh EMAIL=email@irs.gov
+# To add Email address NodeJS, run: ./Nodejs.sh EMAIL=email@email.com
 #"Deployment Directory=${deploy_dir}" is VERY important. This is for Ansible and has to represent the directory that has the scripts and binaries.
 
 ## Common Variables ############################################################################################################################################################
 
-deploy_dir='.' # Comment out when deploying with Ansible.
+#deploy_dir='.' # Comment out when deploying with Ansible.
 VERSION='20.18.1'
 NPM_VERSION='10.8.2'
 
@@ -37,42 +37,28 @@ echo "${FILEPATH}"
 echo "${NODE_VERSION}"
 echo "DATE=${DATE}"
 printf "DATE=%s\n" ${DATE}
-echo "${EMAIL}"
+echo "${EMAIL_LIST}"
 
-
-capture_value() {
-    local VAR_NAME=$1
-    shift
-    if [[ -n "$1" && "$1" != --* ]]; then
-        eval "$VAR_NAME=\"$1\""  # ✅ Set variable correctly
-        shift
-        while [[ -n "$1" && "$1" != --* ]]; do
-            eval "$VAR_NAME+=\" $1\""
-            shift
-        done
-    else
-        echo "❌ Missing value for $VAR_NAME"
-        exit 1
-    fi
-}
-
-# Parse Additional Arguments (Case-Insensitive)
+# Extract command-line arguments
 while [[ $# -gt 0 ]]; do
-    ARG="${1,,}"  # Convert argument to lowercase for case insensitivity
-    case "$ARG" in
+    case "$1" in
         --mode)
-            capture_value CMD_MODE "$@"
+            MODE="$2"
+            shift 2
             ;;
         --email)
-            capture_value EMAIL "$@"
+            if [[ -n "$2" ]]; then
+                EMAIL="$2"
+                shift 2
+            fi
             ;;
         *)
-            echo "❌ Invalid option: $1"
-            echo "Usage: $0 --mode {install|uninstall|update} [--email <email>]"
+            echo "❌ Invalid argument: $1"
             exit 1
             ;;
     esac
 done
+
 
 # Ensure MODE is set (default to install if missing)
 if [[ -z "$MODE" ]]; then
@@ -87,12 +73,11 @@ if [[ ! "$MODE" =~ ^(install|uninstall|update)$ ]]; then
 fi
 
 # Set EMAIL_LIST after extracting --email
-EMAIL_LIST="christopher.g.pouliot@irs.gov"
+EMAIL_LIST="christopher.g.pouliot@email.com"
 # Append provided --email to EMAIL_LIST if it exists
 if [[ -n "$EMAIL" ]]; then
     EMAIL_LIST+=" $EMAIL"
 fi
-echo "🔹 Executing: ${EMAIL_LIST}"
 
 ## Common Functions ############################################################################################################################################################
 

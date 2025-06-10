@@ -9,7 +9,7 @@
 # To install and verify ${SOFTWARENAME}18, place the ${SOFTWARENAME}18.tar.xz and the license properties file in the same directory as this script and run: ./${SOFTWARENAME}.sh install
 # To uninstall NodeJS, run: ./Nodejs.sh uninstall
 # To update NodeJS, run: ./Nodejs.sh update
-# To add Email address NodeJS, run: ./Nodejs.sh EMAIL=email@irs.gov
+# To add Email address NodeJS, run: ./Nodejs.sh EMAIL=email@email.com
 #"Deployment Directory=${deploy_dir}" is VERY important. This is for Ansible and has to represent the directory that has the scripts and binaries.
 
 ## Common Variables ############################################################################################################################################################
@@ -73,7 +73,7 @@ if [[ ! "$MODE" =~ ^(install|uninstall|update)$ ]]; then
 fi
 
 # Set EMAIL_LIST after extracting --email
-EMAIL_LIST="christopher.g.pouliot@irs.gov"
+EMAIL_LIST="christopher.g.pouliot@email.com"
 # Append provided --email to EMAIL_LIST if it exists
 if [[ -n "$EMAIL" ]]; then
     EMAIL_LIST+=" $EMAIL"

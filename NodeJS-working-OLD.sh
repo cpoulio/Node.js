@@ -18,7 +18,7 @@ VERSION='18.20.3'
 NPM_VERSION='10.7.0'
 
 SOFTWARENAME='NodeJS'
-EMAIL_RECIPIENT='christopher.g.pouliot@irs.gov'
+EMAIL_RECIPIENT='christopher.g.pouliot@test.test'
 HOSTNAME="$(uname -n)"
 INSTALLDIR='/usr/local/lib/nodejs'
 LOGDIR="/tmp"
