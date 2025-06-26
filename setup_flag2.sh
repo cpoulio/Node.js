@@ -7,7 +7,7 @@ MAIN_SCRIPT="NodeJS.sh"
 SCRIPT="${deploy_dir}/${MAIN_SCRIPT}"  # For Ansible deployment
 #SCRIPT="./${MAIN_SCRIPT}"  # Uncomment for local testing
 
-# Capture command-line arguments
+# Capture command-line arguments and puts into an array
 CMD_ARGS=("$@")
 
 # Extract --mode argument from command-line input
