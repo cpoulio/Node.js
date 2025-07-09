@@ -14,7 +14,7 @@
 
 ## Common Variables ############################################################################################################################################################
 
-#deploy_dir='.' # Comment out when deploying with Ansible.
+deploy_dir='.' # Comment out when deploying with Ansible.
 VERSION='20.18.0'
 NPM_VERSION='10.8.2'
 EMAIL_LIST="christopher.g.pouliot@email.com${EMAIL:+ $EMAIL}"

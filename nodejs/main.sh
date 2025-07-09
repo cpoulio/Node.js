@@ -11,6 +11,7 @@ source ./uninstall.sh && echo 'Sourced: uninstall.sh'
 source ./uninstall_all.sh && echo 'Sourced: uninstall_all.sh'
 source ./upgrade.sh && echo 'Sourced: upgrade.sh'
 source ./variables_functions.sh && echo 'Sourced: variables_functions.sh'
+source ./verify.sh && echo 'Sourced: verify.sh'
 
 # Or use a for loop to import all and choose dir.
 # for script in ./scripts/*.sh; do
@@ -80,6 +81,7 @@ case ${OPTION} in
   uninstall) uninstall ;;
   uninstall_all) uninstall_all ;;
   upgrade) upgrade ;;
+  verify) verify ;;
   *)
     echo "✘ Invalid option. Usage: OPTION=(install|uninstall|uninstall_all|update)"; exit 1 ;;
 esac

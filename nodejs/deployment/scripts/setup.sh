@@ -28,6 +28,18 @@ done
 # Ensure OPTION is set, default to install
 OPTION="${OPTION:-install}"
 
+# Ensure OPTION is set (default to install if missing)
+if [[ -z "${OPTION}" ]]; then
+    OPTION="install"
+fi
+echo "➤ Selected OPTION: ${OPTION}"
+
+# Ensure only valid options are accepted
+if [[ ! "${OPTION}" =~ ^(install|uninstall|uninstall_all|upgrade)$ ]]; then
+  echo "✘ Invalid OPTION: ${OPTION}. Use --option install, uninstall, uninstall_all, or update."
+  exit 1
+fi
+
 # Build FINAL_ARGS
 FINAL_ARGS="--option $OPTION"
 if [[ -n "$EMAIL" ]]; then
@@ -39,7 +51,6 @@ echo "➤ Executing: ${SCRIPT} ${FINAL_ARGS}"
 echo "➤ DEBUG: FINAL ARGUMENTS TO ${MAIN_SCRIPT}: [${FINAL_ARGS}]"
 
 # Run the main script with correctly formatted arguments
-set -- ${FINAL_ARGS}
-${SCRIPT} "$@"
+${SCRIPT} ${FINAL_ARGS}
 
 echo "✅ ${MAIN_SCRIPT} setup script executed successfully!"
