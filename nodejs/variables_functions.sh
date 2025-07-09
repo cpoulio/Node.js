@@ -107,19 +107,38 @@ backup_and_remove_old_paths() {
 }
 
 remove_nodejs_path_entries() {
-    log "Searching for and removing PATH entries for Node.js from profile files..."
-    for PROFILE in ~/.bash_profile ~/.profile ~/.bashrc ~/.zshrc; do
+    log 'Aggressively removing all Node.js PATH entries from all profile files and current environment...'
+
+    # List of files to process: user/root plus system-wide
+    PROFILE_FILES=(~/.bash_profile ~/.profile ~/.bashrc ~/.zshrc /root/.bash_profile /root/.profile /root/.bashrc /root/.zshrc /etc/profile)
+    for f in /etc/profile.d/*; do
+        [ -f "$f" ] && PROFILE_FILES+=("$f")
+    done
+
+    for PROFILE in "${PROFILE_FILES[@]}"; do
         if [ -f "$PROFILE" ]; then
-            cp -p "$PROFILE" "${PROFILE}.bak" | tee -a "${LOGDIR}/${LOG_FILE}"
-            # Remove lines with nodejs or node-v* in the path
-            sed -i '/nodejs\/node-v.*\/bin/d' "$PROFILE"
+            cp -p "$PROFILE" "${PROFILE}.bak"
+            log "$PROFILE backed up"
+
+            # Remove lines that add node, node-v*, or nodejs bin to PATH (any plausible pattern)
+            sed -i '/node-v[0-9]*\.[0-9]*\.[0-9]*-.*\/bin/d' "$PROFILE"
+            sed -i '/nodejs\/node-v[0-9]*\.[0-9]*\.[0-9]*-.*\/bin/d' "$PROFILE"
             sed -i '/nodejs\/bin/d' "$PROFILE"
-            sed -i '/node-v[0-9].*\/bin/d' "$PROFILE"
-            sed -i '/export PATH=.*nodejs.*\/bin.*$/d' "$PROFILE"
-            sed -i '/export PATH=.*node-v[0-9].*\/bin.*$/d' "$PROFILE"
+            sed -i '/node\/bin/d' "$PROFILE"
+            sed -i '/export PATH=.*nodejs.*\/bin.*:\$PATH/d' "$PROFILE"
+            sed -i '/export PATH=.*node-v.*\/bin.*:\$PATH/d' "$PROFILE"
+            sed -i '/PATH=.*node-v.*\/bin.*:\$PATH/d' "$PROFILE"
+            sed -i '/PATH=.*nodejs.*\/bin.*:\$PATH/d' "$PROFILE"
+
             log "$PROFILE cleaned of Node.js PATH entries"
-        else
-            log "No $PROFILE found to clean"
         fi
     done
+
+    # Remove Node.js directories from current PATH in this session (runtime only)
+    OLD_PATH="$PATH"
+    NEW_PATH=$(echo "$PATH" | tr ':' '\n' | grep -v "node-v" | grep -v "nodejs" | paste -sd:)
+    export PATH="$NEW_PATH"
+    log "PATH updated for current shell session (Node.js entries removed)."
+    log "Old PATH: $OLD_PATH"
+    log "New PATH: $PATH"
 }
