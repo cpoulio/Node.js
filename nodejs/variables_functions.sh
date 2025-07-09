@@ -105,3 +105,21 @@ backup_and_remove_old_paths() {
         fi
     done
 }
+
+remove_nodejs_path_entries() {
+    log "Searching for and removing PATH entries for Node.js from profile files..."
+    for PROFILE in ~/.bash_profile ~/.profile ~/.bashrc ~/.zshrc; do
+        if [ -f "$PROFILE" ]; then
+            cp -p "$PROFILE" "${PROFILE}.bak" | tee -a "${LOGDIR}/${LOG_FILE}"
+            # Remove lines with nodejs or node-v* in the path
+            sed -i '/nodejs\/node-v.*\/bin/d' "$PROFILE"
+            sed -i '/nodejs\/bin/d' "$PROFILE"
+            sed -i '/node-v[0-9].*\/bin/d' "$PROFILE"
+            sed -i '/export PATH=.*nodejs.*\/bin.*$/d' "$PROFILE"
+            sed -i '/export PATH=.*node-v[0-9].*\/bin.*$/d' "$PROFILE"
+            log "$PROFILE cleaned of Node.js PATH entries"
+        else
+            log "No $PROFILE found to clean"
+        fi
+    done
+}
