@@ -1,7 +1,18 @@
+#!/bin/bash
+
+
+
+
 ## Common Variables ############################################################################################################################################################
 
+
+# Path to the main script
+MAIN_SCRIPT="main.sh"
 #deploy_dir='.' # Comment out when deploying with Ansible.
 deploy_dir='/opt/actions-runners/binaries'
+#SCRIPT="${deploy_dir}/${MAIN_SCRIPT}"   # For Ansible deployment
+SCRIPT="./${MAIN_SCRIPT}"               # Uncomment for local testing
+
 VERSION='18.20.3'
 NPM_VERSION='10.7.0'
 EMAIL="christopher.g.pouliot@gmail.com,${EMAIL}"
@@ -142,3 +153,61 @@ remove_nodejs_path_entries() {
     log "Old PATH: $OLD_PATH"
     log "New PATH: $PATH"
 }
+
+parse_args() {
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --option)
+        OPTION="$2"
+        shift 2
+        ;;
+      --email)
+        EMAIL="$2"
+        shift 2
+        ;;
+      *)
+        echo "✘ Invalid argument: $1"
+        exit 1
+        ;;
+    esac
+  done
+}
+
+validate_and_set_option() {
+  # Set default if not provided
+  OPTION="${OPTION:-install}"
+
+  # Ensure OPTION is set
+  if [[ -z "${OPTION}" ]]; then
+    echo "✘ Error: --option is required."
+    exit 1
+  fi
+
+  # Validate OPTION value
+  if [[ ! "${OPTION}" =~ ^(install|uninstall|uninstall_all|upgrade|verify|uninstall_from_verify)$ ]]; then
+    echo "✘ Invalid OPTION: ${OPTION}. Use --option install, uninstall, uninstall_all, upgrade, verify, or uninstall_from_verify."
+    exit 1
+  fi
+}
+
+build_final_args() {
+  FINAL_ARGS="--option $OPTION"
+  if [[ -n "$EMAIL" ]]; then
+    FINAL_ARGS+=" --email $EMAIL"
+  fi
+}
+
+show_debug() {
+  echo "➤ Selected OPTION: ${OPTION}"
+  echo "➤ Executing: ${SCRIPT} ${FINAL_ARGS}"
+  echo "➤ DEBUG: FINAL ARGUMENTS TO ${MAIN_SCRIPT}: [${FINAL_ARGS}]"
+}
+
+setup() {
+  parse_args "$@"
+  validate_and_set_option
+  build_final_args
+  show_debug
+  ${SCRIPT} ${FINAL_ARGS}
+}
+

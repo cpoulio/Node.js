@@ -1,56 +1,13 @@
 #!/bin/bash
 set -x
-#########################################
-MAIN_SCRIPT="main.sh"
 
-# Path to the main script
-#SCRIPT="${deploy_dir}/${MAIN_SCRIPT}"   # For Ansible deployment
-SCRIPT="./${MAIN_SCRIPT}"               # Uncomment for local testing
+# This script sets up the environment and runs the main Node.js management script with the provided options
+# It ensures that all necessary variables are defined and that the correct options are passed to the main script
+# The script is designed to be flexible and can be used in various deployment scenarios, including local testing and Ansible deployments
+# It also includes functions for logging, sending email notifications, and managing Node.js installations
+# The script is modular, allowing for easy updates and maintenance of the Node.js environment
+# It is intended to be run in a Linux environment and assumes that the necessary dependencies
+# Source shared variables and functions
 
-# Extract command-line arguments
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --option)
-      OPTION="$2"
-      shift 2
-      ;;
-    --email)
-      EMAIL="$2"
-      shift 2
-      ;;
-    *)
-      echo "✘ Invalid argument: $1"
-      exit 1
-      ;;
-  esac
-done
-
-# Ensure OPTION is set, default to install
-OPTION="${OPTION:-install}"
-
-# Ensure OPTION is set (default to install if missing)
-if [[ -z "${OPTION}" ]]; then
-    OPTION="install"
-fi
-echo "➤ Selected OPTION: ${OPTION}"
-
-# Ensure only valid options are accepted
-if [[ ! "${OPTION}" =~ ^(install|uninstall|uninstall_all|upgrade)$ ]]; then
-  echo "✘ Invalid OPTION: ${OPTION}. Use --option install, uninstall, uninstall_all, or update."
-  exit 1
-fi
-
-# Build FINAL_ARGS
-FINAL_ARGS="--option $OPTION"
-if [[ -n "$EMAIL" ]]; then
-  FINAL_ARGS+=" --email $EMAIL"
-fi
-
-# Debugging: Show the exact command being executed
-echo "➤ Executing: ${SCRIPT} ${FINAL_ARGS}"
-echo "➤ DEBUG: FINAL ARGUMENTS TO ${MAIN_SCRIPT}: [${FINAL_ARGS}]"
-
-# Run the main script with correctly formatted arguments
-${SCRIPT} ${FINAL_ARGS}
-
-echo "✅ ${MAIN_SCRIPT} setup script executed successfully!"
+source ./variables_functions.sh
+setup "$@"
