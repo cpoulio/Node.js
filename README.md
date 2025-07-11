@@ -36,6 +36,10 @@ How to Uninstall:
 | `verify.sh`              | Defines `verify` function                                    | `variables_functions.sh` (for vars)     |
 | `uninstall_from_verify.sh` | Defines `uninstall_from_verify` function                   | `variables_functions.sh`, `verify.sh`   |
 
+**Example Usage:**
+```bash
+./setup.sh --option install --email you@email.com
+
 
 How to Update:
 --------------
