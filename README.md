@@ -22,6 +22,21 @@ How to Uninstall:
 
 -   Run the script with `setup.sh` for *Uninstall*: `MODE=uninstall ./setup.sh`
 
+## Summary Table
+
+| Script                   | Purpose/Role                                                  | Calls/Depends On                        |
+|--------------------------|--------------------------------------------------------------|-----------------------------------------|
+| `setup.sh`               | Entry point, sources variables/functions, calls `setup "$@"` | `variables_functions.sh`                |
+| `variables_functions.sh` | Shared variables, utility functions, `setup` function        | -                                       |
+| `main.sh`                | Sources all scripts, parses args, dispatches to correct function | All other scripts                   |
+| `install.sh`             | Defines `install` function                                   | `variables_functions.sh` (for vars)     |
+| `uninstall.sh`           | Defines `uninstall` function                                 | `variables_functions.sh` (for vars)     |
+| `uninstall_all.sh`       | Defines `uninstall_all` function                             | `variables_functions.sh` (for vars)     |
+| `upgrade.sh`             | Defines `upgrade` function                                   | `variables_functions.sh` (for vars)     |
+| `verify.sh`              | Defines `verify` function                                    | `variables_functions.sh` (for vars)     |
+| `uninstall_from_verify.sh` | Defines `uninstall_from_verify` function                   | `variables_functions.sh`, `verify.sh`   |
+
+
 How to Update:
 --------------
 
