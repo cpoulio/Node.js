@@ -6,12 +6,14 @@ set -x
 #########################################
 
 # Source Each Script
+
 source ./install.sh && echo 'Sourced: install.sh'
 source ./uninstall.sh && echo 'Sourced: uninstall.sh'
 source ./uninstall_all.sh && echo 'Sourced: uninstall_all.sh'
 source ./upgrade.sh && echo 'Sourced: upgrade.sh'
 source ./variables_functions.sh && echo 'Sourced: variables_functions.sh'
 source ./verify.sh && echo 'Sourced: verify.sh'
+source ./uninstall_from_verify.sh && echo 'Sourced: uninstall_from_verify.sh'
 
 # Or use a for loop to import all and choose dir.
 # for script in ./scripts/*.sh; do
@@ -58,8 +60,9 @@ if [[ -z "${OPTION}" ]]; then
 fi
 
 # Ensure only valid options are accepted
-if [[ ! "${OPTION}" =~ ^(install|uninstall|uninstall_all|upgrade)$ ]]; then
-  echo "✘ Invalid OPTION: ${OPTION}. Use --option install, uninstall, uninstall_all, or update."
+
+if [[ ! "${OPTION}" =~ ^(install|uninstall|uninstall_all|upgrade|verify|uninstall_from_verify)$ ]]; then
+  echo "✘ Invalid OPTION: ${OPTION}. Use --option install, uninstall, uninstall_all, upgrade, verify, or uninstall_from_verify."
   exit 1
 fi
 
@@ -82,6 +85,7 @@ case ${OPTION} in
   uninstall_all) uninstall_all ;;
   upgrade) upgrade ;;
   verify) verify ;;
+  uninstall_from_verify) uninstall_from_verify ;;
   *)
-    echo "✘ Invalid option. Usage: OPTION=(install|uninstall|uninstall_all|update)"; exit 1 ;;
+    echo "✘ Invalid option. Usage: OPTION=(install|uninstall|uninstall_all|upgrade|verify|uninstall_from_verify)"; exit 1 ;;
 esac
