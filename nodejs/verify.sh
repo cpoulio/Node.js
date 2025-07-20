@@ -4,55 +4,68 @@
 # This script does NOT source any other scripts. Sourcing is handled by main.sh.
 # Only the function is defined here for reuse.
 
+
 verify() {
     LOG_FILE="verify_nodejs.log"
     > "${LOGDIR}/${LOG_FILE}"
     log "Starting Node.js verification..."
 
-    # 1. Node.js & NPM versions
-    NODE_VERSION_OUTPUT="$(command -v node >/dev/null 2>&1 && node -v 2>/dev/null || echo "Not found")"
-    NPM_VERSION_OUTPUT="$(command -v npm >/dev/null 2>&1 && npm -v 2>/dev/null || echo "Not found")"
-    NPX_VERSION_OUTPUT="$(command -v npx >/dev/null 2>&1 && npx -v 2>/dev/null || echo "Not found")"
-    log "Node.js version: $NODE_VERSION_OUTPUT"
-    log "npm version: $NPM_VERSION_OUTPUT"
-    log "npx version: $NPX_VERSION_OUTPUT"
+    # 1. Node.js & NPM versions for current user
+    for cmd in node npm npx; do
+        if command -v "$cmd" >/dev/null 2>&1; then
+            ver="$($cmd -v 2>/dev/null || echo 'n/a')"
+            log "$cmd version: $ver"
+        else
+            log "$cmd version: Not found"
+        fi
+    done
 
-    # 2. PATH contents
-    log "PATH contents: $PATH"
-    if echo "$PATH" | grep -q "node"; then
-        log "Node.js-related directories found in PATH."
-        echo "$PATH" | tr ':' '\n' | grep "node" | while read -r path; do
-            log "  PATH entry: $path"
-        done
-    else
-        log "No Node.js-related directories in PATH."
-    fi
+    # 2. PATH entries for all system users
+    log "Checking PATH entries for all system users containing 'node'..."
+    getent passwd | while IFS=: read -r uname _ _ _ _ homedir shell; do
+        if [ -d "$homedir" ] && [ -n "$shell" ] && [ -x "$shell" ]; then
+            userpath=$(su -l "$uname" -c 'echo $PATH' 2>/dev/null)
+            if printf '%s\n' "$userpath" | tr ':' '\n' | grep -iq node; then
+                printf '%s\n' "$userpath" | tr ':' '\n' | grep -i node | while read -r p; do
+                    log "User '$uname' has PATH entry: $p"
+                done
+            fi # end inner if (PATH contains node)
+        fi # end outer if (valid home and shell)
+    done
 
-    # 3. Symlink checks for node, npm, npx
-    log "Checking for node, npm, npx symlinks in common bin directories..."
+    # 3. Symlinks for node, npm, npx
+    log "Checking for node, npm, npx symlinks in standard bin directories..."
     for bin in node npm npx; do
-        for dir in /usr/local/bin /usr/bin /bin /usr/sbin /sbin; do
-            [ -e "$dir/$bin" ] || continue
-            if [ -L "$dir/$bin" ]; then
-                TARGET=$(readlink "$dir/$bin")
-                log "Symlink: $dir/$bin -> $TARGET"
-            else
-                log "File: $dir/$bin (not a symlink)"
+        for dir in /usr/local/bin /usr/bin /bin /usr/sbin /sbin /snap/bin; do
+            if [ -e "${dir}/${bin}" ]; then
+                if [ -L "${dir}/${bin}" ]; then
+                    target=$(readlink "${dir}/${bin}")
+                    log "Symlink: ${dir}/${bin} -> $target"
+                else
+                    log "File: ${dir}/${bin} exists (not a symlink)"
+                fi
             fi
         done
     done
 
-    # 4. Find all executables named node, npm, npx
-    log "Scanning filesystem for all node, npm, npx executables (may take a while)..."
+    # 4. Find all executables in filesystem and warn if in vital OS paths
+    log "Scanning filesystem for any node, npm, npx executables..."
     for bin in node npm npx; do
-        find / -type f -name "$bin" -perm /111 2>/dev/null | while read -r f; do
-            ver="$("$f" -v 2>/dev/null || echo 'N/A')"
-            log "Found $bin: $f (version: $ver)"
+        find / -path /proc -prune -o -type f -name "$bin" -perm /111 -print 2>/dev/null | while read -r f; do
+            ver="$($f -v 2>/dev/null || echo 'N/A')"
+            case "$f" in
+                /bin/*|/sbin/*|/usr/bin/*|/usr/sbin/*)
+                    log "WARNING: Found $bin in vital OS path: $f (version: $ver) -- DO NOT DELETE unless you are absolutely sure!"
+                    ;;
+                *)
+                    log "Found $bin: $f (version: $ver)"
+                    ;;
+            esac
         done
     done
 
-    # 5. List running processes for node
-    log "Listing running node processes..."
+    # 5. Running Node processes
+    log "Listing running processes using node..."
     pgrep -af node | while read -r line; do
         log "Node process: $line"
     done

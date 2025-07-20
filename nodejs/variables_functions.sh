@@ -1,8 +1,5 @@
 #!/bin/bash
 
-
-
-
 ## Common Variables ############################################################################################################################################################
 
 
@@ -37,6 +34,18 @@ echo "${NODE_VERSION}"
 echo "DATE=${DATE}"
 printf "DATE=%s\n" ${DATE}
 echo "${EMAIL}"
+
+# Ensures the script is running as root if the user matches npevlttcots* pattern
+ensure_root() {
+  local current_user
+  current_user="$(whoami)"
+  # If not root and matches npevlttcots* pattern, re-exec script as root
+  if [[ "$current_user" != "root" && "$current_user" =~ ^npevlttcots[0-9]+$ ]]; then
+    echo "Current user is $current_user, escalating to root for script execution..."
+    exec sudo "$0" "$@"
+    exit 1
+  fi
+}
 
 log() {
     echo "${DATE} - $1" | tee -a "${LOGDIR}/${LOG_FILE}"
@@ -175,7 +184,7 @@ parse_args() {
 
 validate_and_set_option() {
   # Set default if not provided
-  OPTION="${OPTION:-install}"
+  OPTION="${OPTION:-verify}"
 
   # Ensure OPTION is set
   if [[ -z "${OPTION}" ]]; then

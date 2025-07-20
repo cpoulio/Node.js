@@ -21,7 +21,27 @@ How to Uninstall:
 -   Run the script with *Uninstall* using the `NodeJS.sh` script: `./NodeJS.sh --mode uninstall`
 
 -   Run the script with `setup.sh` for *Uninstall*: `MODE=uninstall ./setup.sh`
+setup.sh → [validates args, calls]
 
+    |
+
+    ↓
+
+main.sh → [parses --option, dispatches]
+
+    |                   |                 |                 |                |                |
+
+    |                   |                 |                 |                |                |
+
+install.sh         uninstall.sh       verify.sh     uninstall_from_verify.sh   update.sh   update_after_uninstall_from_verify.sh
+
+    |                   |                 |                 |                |                |
+
+    |                   |                 |                 |                |                |
+
+variables_functions.sh (sourced by all above)
+
+update.sh / update_after_uninstall_from_verify.sh → uninstall_from_verify.sh → verify.sh
 ## Summary Table
 
 | Script                   | Purpose/Role                                                  | Calls/Depends On                        |

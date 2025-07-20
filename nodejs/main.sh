@@ -6,14 +6,8 @@ set -x
 #########################################
 
 # Source Each Script
-
-source ./install.sh && echo 'Sourced: install.sh'
-source ./uninstall.sh && echo 'Sourced: uninstall.sh'
-source ./uninstall_all.sh && echo 'Sourced: uninstall_all.sh'
-source ./upgrade.sh && echo 'Sourced: upgrade.sh'
 source ./variables_functions.sh && echo 'Sourced: variables_functions.sh'
-source ./verify.sh && echo 'Sourced: verify.sh'
-source ./uninstall_from_verify.sh && echo 'Sourced: uninstall_from_verify.sh'
+
 
 # Or use a for loop to import all and choose dir.
 # for script in ./scripts/*.sh; do
@@ -54,17 +48,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Ensure OPTION is set (default to install if missing)
-if [[ -z "${OPTION}" ]]; then
-  echo "✘ Error: --option is required."
-  exit 1
-fi
-
-# Ensure only valid options are accepted
-
-if [[ ! "${OPTION}" =~ ^(install|uninstall|uninstall_all|upgrade|verify|uninstall_from_verify)$ ]]; then
-  echo "✘ Invalid OPTION: ${OPTION}. Use --option install, uninstall, uninstall_all, upgrade, verify, or uninstall_from_verify."
-  exit 1
-fi
+validate_and_set_option
 
 # Set EMAIL_LIST after extracting --email
 EMAIL_LIST='christopher.g.pouliot@irs.gov'
@@ -74,18 +58,37 @@ if [[ -n "$EMAIL" ]]; then
 fi
 
 echo "➤ Executing: [${EMAIL_LIST}]"
+echo "DEBUG: OPTION is '$OPTION'"
 
 #########################################
 # Main Execution Logic
 #########################################
 
 case ${OPTION} in
-  install) install ;;
-  uninstall) uninstall ;;
-  uninstall_all) uninstall_all ;;
-  upgrade) upgrade ;;
-  verify) verify ;;
-  uninstall_from_verify) uninstall_from_verify ;;
+  install)
+    source ./install.sh
+    install
+    ;;
+  uninstall)
+    source ./uninstall.sh
+    uninstall
+    ;;
+  uninstall_all)
+    source ./uninstall_all.sh
+    uninstall_all
+    ;;
+  upgrade)
+    source ./upgrade.sh
+    upgrade
+    ;;
+  verify)
+    source ./verify.sh
+    verify
+    ;;
+  uninstall_from_verify)
+    source ./uninstall_from_verify.sh
+    uninstall_from_verify
+    ;;
   *)
-    echo "✘ Invalid option. Usage: OPTION=(install|uninstall|uninstall_all|upgrade|verify|uninstall_from_verify)"; exit 1 ;;
+    echo "✘ Invalid option. Usage: OPTION=(install|uninstall|uninstall_all|upgrade|verify|uninstall_from_verify)" ; exit 1 ;;
 esac
