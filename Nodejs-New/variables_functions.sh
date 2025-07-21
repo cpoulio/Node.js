@@ -13,8 +13,8 @@ SCRIPT="${deploy_dir}/${MAIN_SCRIPT}" # Uncomment for Ansible deployment
 echo "DEBUG in Main.sh: 'Deployment Directory=>${deploy_dir}'"
 
 ################################################################################
-VERSION="20.19.2"
-NPM_VERSION="10.8.2"
+VERSION="20.18.1"
+NPM_VERSION="10.8.1"
 
 ### Variables that Do Not Change Much #####
 SOFTWARENAME="NodeJS"

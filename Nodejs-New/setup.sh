@@ -1,11 +1,10 @@
 #!/bin/bash
-# shellcheck disable=SC1091
 set -x
 shopt -s extglob
 set -euo pipefail
 
 ################################################################################
-echo "-------------------- Starting Setup.SH Script --------------------"
+echo "-------------------- Starting Setup.sh Script --------------------"
 source ./variables_functions.sh && echo "Sourced: variables_functions.sh"
 echo "DEBUG in Setup.SH: Deployment Directory=${deploy_dir}"
 echo "Starting Setup Script"
@@ -17,8 +16,8 @@ echo "$result"
 
 validate_option() {
   # Validate OPTION value
-  if [[ ! "${OPTION}" =~ ^(install|uninstall|uninstall_all|uninstall_from_verify|update|update_afte_uninstall_from_verify|verify)$ ]]; then
-    echo "X Invalid OPTION: ${OPTION}. Use --option install, uninstall, uninstall_all, uninstall_from_verify, update, update_afte_uninstall_from_verify, verify."
+  if [[ ! "${OPTION}" =~ ^(install|uninstall|uninstall_all|uninstall_from_verify|update|update_after_uninstall_from_verify|verify)$ ]]; then
+    echo "X Invalid OPTION: ${OPTION}. Use --option install, uninstall, uninstall_all, uninstall_from_verify, update, update_after_uninstall_from_verify, verify."
     return 1
   fi
 }
@@ -44,14 +43,11 @@ parse_args() {
   done
 }
 
-# Path to the main script
-#deploy_dir='/opt/actions-runner/binaries' # Use for GitHub Actions, Comment out when deploying with Ansible.
-
-# Extract command-line arguments
+# Extract command-line arguments (can also get OPTION from env)
 parse_args "$@"
 
-# Double Ensure OPTION is set, default to install
-OPTION="${OPTION-verify}"
+# Double Ensure OPTION is set, default to verify if not present
+OPTION="${OPTION:-${OPTION:-verify}}"
 if [[ -z "$OPTION" ]]; then
   OPTION="verify"
 fi
@@ -66,10 +62,14 @@ if [[ -n "$EMAIL" ]]; then
   FINAL_ARGS+=" --email $EMAIL"
 fi
 
+# Export for downstream scripts (important!)
+export OPTION
+export EMAIL
+
 echo "Debugging: Print the final command before executing"
 echo "  > Executing: ${SCRIPT} ${FINAL_ARGS}"
 
-echo "${NODESJFILE}"
+echo "${NODEJSFILE}"
 echo "${FILEPATH}"
 echo "${NODE_VERSION}"
 echo "DATE=${DATE}"
@@ -83,7 +83,5 @@ echo "DEBUG: FINAL ARG is: $FINAL_ARGS"
 echo "DEBUG: OPTION is $OPTION"
 echo " > DEBUG: Executing: ${SCRIPT} ${FINAL_ARGS}"
 
-# Execute the script only once
+# Execute the main script
 exec "${SCRIPT}" ${FINAL_ARGS}
-show_debug
-echo "✅ ${SCRIPT} setup script executed successfully!"

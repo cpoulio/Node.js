@@ -4,7 +4,6 @@ shopt -s extglob
 set -euo pipefail
 
 ##################################################################
-# Source Scripts you need
 echo "------------------Starting Main.sh Script---------------------"
 EMAIL=""
 EMAIL_LIST=""
@@ -13,33 +12,9 @@ echo "DEBUG in Main.sh: Deployment Directory=${deploy_dir}"
 ensure_root "$@"
 result="$(ensure_root)"
 echo "$result"
-e9 "$(ensure_root)"
 
 ##################################################################
-### Source scripts
-##################################################################
-
-### Check Variables ##############################################
-email_list () {
-  echo "Set EMAIL_LIST after extracting --email"
-  EMAIL_LIST="christopher.g.pouliot@irs.gov"
-  # Append provided --email to EMAIL_LIST if it exists
-  if [[ -n "$EMAIL" ]]; then
-    EMAIL_LIST="$EMAIL"
-  fi
-  echo "  * Executing: ${EMAIL_LIST}"
-}
-
-send_email() {
-  echo "Sending-email notification..."
-  EMAIL_SUBJECT="$(hostname): ${LOG_FILE} successfully."
-  echo "* EMAIL_SUBJECT=${EMAIL_SUBJECT}; ${EMAIL_LIST}"
-  echo "* DEBUG: FINAL EMAIL LIST BEFORE MAILX: [${EMAIL_LIST}]"
-  mailx -s "${EMAIL_SUBJECT}" ${EMAIL_LIST} < "${LOGDIR}/${LOG_FILE}"
-
-  echo "*${EMAIL_LIST}"
-}
-
+# Parse command-line arguments (OPTION can also be set via env)
 parse_args() {
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -61,11 +36,10 @@ parse_args() {
   done
 }
 
-##################################################################
-## Check Variables ###############################################
-##################################################################
 parse_args "$@"
-echo "$(parse_args)"
+
+# If OPTION is still not set, default to verify
+OPTION="${OPTION:-verify}"
 
 echo "STARTING SCRIPT: ${SOFTWARENAME}"
 echo "Deployment Directory=${deploy_dir}"
@@ -77,8 +51,15 @@ echo "${EMAIL_LIST}"
 echo "ARGS: $@"
 echo "DEBUG: OPTION is ${OPTION}"
 
+email_list () {
+  echo "Set EMAIL_LIST after extracting --email"
+  EMAIL_LIST="christopher.g.pouliot@irs.gov"
+  if [[ -n "$EMAIL" ]]; then
+    EMAIL_LIST="$EMAIL"
+  fi
+  echo "  * Executing: ${EMAIL_LIST}"
+}
 email_list
-echo "$(email_list)"
 
 ls -la
 
@@ -110,11 +91,11 @@ case ${OPTION} in
     source ./update.sh
     update "$@"
     ;;
-  update_afte_uninstall_from_verify)
+  update_after_uninstall_from_verify)
     source ./update_after_uninstall_from_verify.sh
-    update_afte_uninstall_from_verify "$@"
+    update_after_uninstall_from_verify "$@"
     ;;
   *) echo "X Invalid option: $OPTION" ; exit 1 ;;
 esac
 echo "DEBUG: OPTION is ${OPTION}"
-send_email
+# (Do not call send_email here, handled in install/uninstall/verify scripts)

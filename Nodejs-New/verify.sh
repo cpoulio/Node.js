@@ -1,4 +1,19 @@
 #!/bin/bash
+#
+# This script performs a comprehensive audit and validation of Node.js installations on the system.
+#
+# Key Objectives:
+# - Discover all Node.js, npm, and npx binaries across the filesystem.
+# - Verify the integrity and functionality of the intended Node.js installation.
+# - Identify any other Node.js installations that may conflict or cause confusion.
+# - Examine user PATH variables and system symlinks for correct Node.js configuration.
+# - Detect Node.js binaries in critical operating system paths.
+# - List all currently running Node.js processes.
+#
+# Purpose: To provide a complete Node.js inventory, validate deployments,
+#          prevent version conflicts, and ensure safe system operations.
+#
+
 #set -x
 shopt -s extglob
 set -euo pipefail
@@ -9,9 +24,9 @@ echo "---------------------------Starting Verify.sh Script----------------------
 source ./variables_functions.sh && echo 'Sourced: variables_functions.sh'
 
 verify() {
-    log "Verify Nodejs($SOFTWARENAME) Function"
     ACTION_PERFORMED="Verify Nodejs"
     LOG_FILE="node-${NODE_VERSION}-${LINUX_DISTRO}-${ACTION_PERFORMED}-${DATE}.log"
+    log "Verify Nodejs($SOFTWARENAME) Function"
 
     # 1. Node.js & NPM versions for current user
     mapfile -t node_binaries < <(find / -type f -executable -name "node" 2>/dev/null)
@@ -25,17 +40,23 @@ verify() {
     done
 
     # 2. PATH contents for all users.
-    log "Checking PATH entries for all system users containing 'node'..."
     getent passwd | while IFS=: read -r uname _ _ _ _ homedir shell; do
         case "$shell" in
             *bash|*sh|*zsh)
                 if [[ -d "$homedir" ]]; then
                     userpath=$(su -l "$uname" -c 'echo $PATH' 2>/dev/null)
                     if [[ -n "$userpath" ]]; then
-                        printf '%s\n' "$userpath" | tr ':' '\n' | grep -i node | while read -r p; do
-                            log "User $uname has PATH entry: $p"
-                        done
+                        found_node_path=$(printf '%s\n' "$userpath" | tr ':' '\n' | grep -i node || true)
+                        if [[ -n "$found_node_path" ]]; then
+                            log "User $uname: FOUND node in PATH ($found_node_path)"
+                        else
+                            log "User $uname: No node in PATH"
+                        fi
+                    else
+                        log "User $uname: Could not retrieve PATH"
                     fi
+                else
+                    log "User $uname: No home directory"
                 fi
                 ;;
         esac
@@ -66,7 +87,7 @@ verify() {
                 ver="N/A"
             fi
 
-            # Now check if files is in a virtual path
+            # Now check if file is in a vital path
             case "$f" in
                 /bin/*|/sbin/*|/usr/bin/*|/usr/sbin/*)
                     log "WARNING: Found $bin in vital OS path: $f (version: $ver) -- DO NOT DELETE unless sure."
@@ -87,5 +108,3 @@ verify() {
     log "Node.js verification complete."
     send_email
 }
-
-# Do not call the function here. It will be called from main.sh.
