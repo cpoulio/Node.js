@@ -6,12 +6,11 @@ set -euo pipefail
 echo "-------------------Starting Uninstall_from_Verify.sh Script----------------------------"
 source ./variables_functions.sh
 source ./verify.sh
+ACTION_PERFORMED="Uninstall_from_Verify"
+LOG_FILE="node-${NODE_VERSION}-${LINUX_DISTRO}-${ACTION_PERFORMED}-${DATE}.log"
+log "Starting ${ACTION_PERFORMED} ${SOFTWARENAME} Function"
 
 uninstall_from_verify() {
-
-    ACTION_PERFORMED="Uninstall_from_Verify"
-    LOG_FILE="node-${NODE_VERSION}-${LINUX_DISTRO}-${ACTION_PERFORMED}-${DATE}.log"
-    log "Starting ${ACTION_PERFORMED} ${SOFTWARENAME} Function"
 
     log "Running embedded verification to refresh candidate list..."
     verify

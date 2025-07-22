@@ -25,7 +25,7 @@ LINUX_DISTRO="linux-x64"
 NODEJSFILE="node-${NODE_VERSION}-${LINUX_DISTRO}"
 FILEPATH="${INSTALLDIR}/${NODEJSFILE}/bin"
 YUM_PACKAGES="openssl-devel bzip2-devel libicu-devel gcc-c++ make"
-DATE="$(date "+%Y-%m-%d %H:%M:%S")"
+DATE="$(date "+%Y-%m-%d %H-%M-%S")"
 
 ### Check Variables ###
 echo "STARTING SCRIPT: ${SOFTWARENAME}"
@@ -40,11 +40,14 @@ echo "DATE=${DATE}"
 ################################################################################
 
 log() {
-  if [[ -z "${LOG_FILE:-}" ]]; then
-    echo "ERROR: LOG_FILE is not set!"
-    return 1
-  fi
-  echo "$(date "+%Y-%m-%d %H:%M:%S") - $1" | tee -a "${LOGDIR}/${LOG_FILE}"
+    echo "${DATE} - $1" | tee -a "${LOGDIR}/${LOG_FILE}"
+}
+
+send_email() {
+    echo 'Sending-email notification...'
+    EMAIL_SUBJECT="${HOSTNAME}: ${LOG_FILE} successfully."
+    echo "${EMAIL_SUBJECT}" $EMAIL_LIST
+    mailx -s "${EMAIL_SUBJECT}" $EMAIL_LIST < "${LOGDIR}/${LOG_FILE}"
 }
 
 backup_and_remove_old_paths() {

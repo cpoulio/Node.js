@@ -14,8 +14,8 @@ source ./install.sh
 source ./verify.sh
 
 # Call the functions directly
-uninstall_from_verify
-install
-verify
+uninstall_from_verify 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
+install 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
+verify 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
 
 log "--------------------Update.sh Script Completed--------------------"

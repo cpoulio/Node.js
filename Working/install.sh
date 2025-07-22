@@ -30,16 +30,6 @@ update_bash_profile() {
         echo "export BASHRCSOURCED=1" >> ~/.bash_profile
     fi
 
-    # Auto-inject PATH cleanup to remove old node-v20.18.1 in future shells
-    if ! grep -q "Remove old NodeJS paths" ~/.bash_profile; then
-      cat << 'EOF' >> ~/.bash_profile
-
-# Remove old NodeJS paths (autoinjected)
-export PATH=$(echo "$PATH" | tr ':' '\n' | awk '!seen[$0]++' | grep -v "/usr/local/lib/nodejs/node-v20.18.1" | paste -sd:)
-EOF
-      log ".bash_profile patched to remove stale NodeJS paths automatically in future sessions."
-    fi
-
     # Reload profile in current script session
     BASHRCSOURCED=1 . ~/.bash_profile
     log 'Profile reloaded'
@@ -52,7 +42,7 @@ temp_profile() {
 extract_nodejs() {
     if [ ! -f "${deploy_dir}/${NODEJSFILE}.tar.xz" ]; then
         log "${SOFTWARENAME} TAR not found."
-        exit 1
+        return 1
     else
         log "TAR Found ${NODEJSFILE}.tar.xz."
     fi
@@ -61,7 +51,7 @@ extract_nodejs() {
     tar -xJf "${deploy_dir}/${NODEJSFILE}.tar.xz" -C ${INSTALLDIR} 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
     if [ $? -ne 0 ]; then
         log "Failed to extract ${NODEJSFILE}."
-        exit 1
+        return 1
     else
         log "Successfully extracted ${NODEJSFILE}."
     fi
@@ -72,7 +62,7 @@ install_YUM_packages() {
     yum install -y ${YUM_PACKAGES} 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
     if [ $? -ne 0 ]; then
         log 'Failed to install prerequisites. Exiting.'
-        exit 1
+        return 1
     fi
     log 'Prerequisites libraries installed successfully.'
 }
@@ -102,7 +92,7 @@ install() {
         log "Symbolic link for node created successfully and is executable."
     else
         log "Failed to create or set executable permission for symbolic link to node."
-        exit 1
+        return 1
     fi
 
     # Symlink npm
@@ -111,7 +101,7 @@ install() {
         log "Symbolic link for npm created successfully and is executable."
     else
         log "Failed to create or set executable permission for symbolic link to npm."
-        exit 1
+        return 1
     fi
 
     # Symlink npx
@@ -120,7 +110,7 @@ install() {
         log "Symbolic link for npx created successfully and is executable."
     else
         log "Failed to create or set executable permission for symbolic link to npx."
-        exit 1
+        return 1
     fi
 
     echo "Node Version Installed: ${NODE_VERSION}"
