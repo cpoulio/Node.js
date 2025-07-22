@@ -20,6 +20,7 @@ update_bash_profile() {
     log 'Updating profile files...'
     cp -p ~/.bash_profile ~/.bash_profile.bak
     log 'bash_profile backed up'
+
     sed -i -e 's|\$PATH:\$PATH:$HOME/bin|:$PATH:$HOME/bin|' ~/.bash_profile
     echo "export PATH=${INSTALLDIR}/${NODEJSFILE}/bin:\$PATH" >> ~/.bash_profile
     log '.bash_profile updated'
@@ -29,7 +30,17 @@ update_bash_profile() {
         echo "export BASHRCSOURCED=1" >> ~/.bash_profile
     fi
 
-    # Now source the profile safely
+    # Auto-inject PATH cleanup to remove old node-v20.18.1 in future shells
+    if ! grep -q "Remove old NodeJS paths" ~/.bash_profile; then
+      cat << 'EOF' >> ~/.bash_profile
+
+# Remove old NodeJS paths (autoinjected)
+export PATH=$(echo "$PATH" | tr ':' '\n' | awk '!seen[$0]++' | grep -v "/usr/local/lib/nodejs/node-v20.18.1" | paste -sd:)
+EOF
+      log ".bash_profile patched to remove stale NodeJS paths automatically in future sessions."
+    fi
+
+    # Reload profile in current script session
     BASHRCSOURCED=1 . ~/.bash_profile
     log 'Profile reloaded'
 }
@@ -81,7 +92,6 @@ install() {
     NPM_BIN_PATH=$(which npm)
     NPX_BIN_PATH=$(which npx)
 
-    # Print for debugging
     echo "DEBUG: NODE_BIN_PATH=$NODE_BIN_PATH"
     echo "DEBUG: NPM_BIN_PATH=$NPM_BIN_PATH"
     echo "DEBUG: NPX_BIN_PATH=$NPX_BIN_PATH"
@@ -146,7 +156,15 @@ install() {
     fi
 
     update_bash_profile
+
+    # Final session-level cleanup to remove duplicates and old paths
+    export PATH=$(echo "$PATH" | tr ':' '\n' | awk '!seen[$0]++' | grep -v "/usr/local/lib/nodejs/node-v20.18.1" | paste -sd:)
+    export PATH="${INSTALLDIR}/${NODEJSFILE}/bin:$PATH"
+    log "PATH cleaned of duplicates and old versions. Updated to ${NODE_VERSION}."
+
     log "Installation and verification completed."
-    send_email
+
+    # Skip send_email if not defined (test mode)
+    type send_email &>/dev/null && send_email || log "send_email function not found, skipping email."
 }
 
