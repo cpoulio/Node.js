@@ -1,32 +1,21 @@
 #!/bin/bash
-#set -x
+
 shopt -s extglob
 set -euo pipefail
-################################################################################
-source ./variables_functions.sh && echo 'Sourced: variables_functions.sh'
-ACTION_PERFORMED='Update'
-LOG_FILE=$(generate_log_file_name)
 
 echo "--------------------Starting Update.sh Script--------------------"
 
-update() {
-    log "Starting ${ACTION_PERFORMED} ${SOFTWARENAME} Function"
-    echo "$DATE - Starting Update NodeJS Function"
+# Force source the functions
+source ./variables_functions.sh
 
-    echo "$DATE - Running: OPTION=uninstall_from_verify ./setup.sh"
-    export OPTION=uninstall_from_verify
-    ./setup.sh
+# Source the scripts to get their functions
+source ./uninstall_from_verify.sh
+source ./install.sh
+source ./verify.sh
 
-    echo "$DATE - Running: OPTION=install ./setup.sh"
-    export OPTION=install
-    ./setup.sh
+# Call the functions directly
+uninstall_from_verify
+install
+verify
 
-    echo "$DATE - Reloading profile to activate updated NodeJS path"
-    BASHRCSOURCED=1 . ~/.bash_profile
-
-    echo "$DATE - Update process completed."
-    log "Update completed successfully."
-}
-
-update
-send_email
+log "--------------------Update.sh Script Completed--------------------"
