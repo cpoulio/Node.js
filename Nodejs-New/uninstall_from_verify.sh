@@ -2,7 +2,7 @@
 #set -x
 shopt -s extglob
 set -euo pipefail
-##########################################################
+###########################################################
 echo "-------------------Starting Uninstall_from_Verify.sh Script----------------------------"
 source ./variables_functions.sh
 source ./verify.sh
