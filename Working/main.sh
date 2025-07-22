@@ -71,7 +71,7 @@ case ${OPTION} in
     install "$@"
     ;;
   uninstall)
-    source ./uninstall_from_verify.sh
+    source ./uninstall.sh
     uninstall "$@"
     ;;
   verify)

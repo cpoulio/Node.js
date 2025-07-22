@@ -1,23 +1,20 @@
 #!/bin/bash
 #set -x
-#shopt -s extglob
-#set -euo pipefail
+shopt -s extglob
+set -euo pipefail
 
 ##########################################################
 
 echo "-------------------Starting Install.sh Script----------------------------"
 
 source ./variables_functions.sh && echo 'Sourced: variables_functions.sh'
-ACTION_PERFORMED='Install and Verify'
-LOG_FILE=$(generate_log_file_name)
+
 echo "Starting Install Script"
 ensure_root "$@"
 
-if [ "${BASHRCSOURCED:-0}" != "1" ]; then
-    export BASHRCSOURCED=1
-    . ~/.bash_profile
-    log 'Profile reloaded'
-fi
+ACTION_PERFORMED='Install and Verify'
+LOG_FILE="node-${NODE_VERSION}-${LINUX_DISTRO}-${ACTION_PERFORMED}-${DATE}.log"
+log 'Starting Install and Verify Function'
 
 update_bash_profile() {
     log 'Updating profile files...'
@@ -26,7 +23,14 @@ update_bash_profile() {
     sed -i -e 's|\$PATH:\$PATH:$HOME/bin|:$PATH:$HOME/bin|' ~/.bash_profile
     echo "export PATH=${INSTALLDIR}/${NODEJSFILE}/bin:\$PATH" >> ~/.bash_profile
     log '.bash_profile updated'
-    . ~/.bash_profile
+
+    # Prevent unbound variable error from /etc/bashrc
+    if ! grep -q 'BASHRCSOURCED=' ~/.bash_profile; then
+        echo "export BASHRCSOURCED=1" >> ~/.bash_profile
+    fi
+
+    # Now source the profile safely
+    BASHRCSOURCED=1 . ~/.bash_profile
     log 'Profile reloaded'
 }
 
@@ -63,10 +67,9 @@ install_YUM_packages() {
 }
 
 install() {
-    
-    log "Starting ${ACTION_PERFORMED} ${SOFTWARENAME} Function"
-
-    # Common Functions
+    log 'Starting Install and Verify Function'
+    ACTION_PERFORMED='Install and Verify'
+    LOG_FILE="node-${NODE_VERSION}-${LINUX_DISTRO}-${ACTION_PERFORMED}-${DATE}.log"
     install_YUM_packages
     extract_nodejs
 
@@ -143,12 +146,6 @@ install() {
     fi
 
     update_bash_profile
-    
-    # Add this block below
-    log "Exporting Node.js path for current session"
-    export PATH=${INSTALLDIR}/${NODEJSFILE}/bin:$PATH
-    hash -r
-
     log "Installation and verification completed."
     send_email
 }

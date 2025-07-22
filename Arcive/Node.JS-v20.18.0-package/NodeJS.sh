@@ -143,10 +143,11 @@ backup_and_remove_old_paths() {
 
 install() {
 
-    log 'Starting Install and Verify Function'
+    
     ACTION_PERFORMED='Install and Verify'
     LOG_FILE="node-${NODE_VERSION}-${LINUX_DISTRO}-${ACTION_PERFORMED}-${DATE}.log"
-
+    log 'Starting Install and Verify Function'
+    
     install_YUM_packages # Installing YUM packages function.
 
     extract_nodejs # Check if the ${SOFTWARENAME} tar file was found and Extract ${SOFTWARENAME} function.

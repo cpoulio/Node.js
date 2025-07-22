@@ -8,12 +8,12 @@ echo "--------------------Starting Variables_Functions.sh Script----------------
 
 MAIN_SCRIPT="main.sh"
 deploy_dir="./"  # Local Testing: Comment out when deploying with Ansible.
-SCRIPT="${deploy_dir}/${MAIN_SCRIPT}" 
+SCRIPT="${deploy_dir}/${MAIN_SCRIPT}" # Uncomment for Ansible deployment
 echo "DEBUG in Main.sh: 'Deployment Directory=>${deploy_dir}'"
 
 ################################################################################
 VERSION="20.18.1"
-NPM_VERSION="10.8.2"
+NPM_VERSION="10.8.1"
 
 ### Variables that Do Not Change Much #####
 SOFTWARENAME="NodeJS"
@@ -40,36 +40,11 @@ echo "DATE=${DATE}"
 ################################################################################
 
 log() {
-    local message="$1"
-
-    # Ensure log file exists
-    if [ -n "${LOG_FILE:-}" ] && [ ! -f "$LOG_FILE" ]; then
-        mkdir -p "$(dirname "$LOG_FILE")" 2>/dev/null || true
-        touch "$LOG_FILE"
-    fi
-
-    # Write to log
-    if [ -n "${LOG_FILE:-}" ]; then
-        echo "$DATE - $message" | tee -a "$LOG_FILE"
-    else
-        echo "$DATE - $message"
-    fi
-}
-
-generate_log_file_name() {
-    local safe_date="$(date "+%Y-%m-%d_%H-%M-%S")"
-    local file_name="${SOFTWARENAME}-${ACTION_PERFORMED}-${safe_date}.log"
-    local full_path="${LOGDIR}/${file_name}"
-    log "Creating log file: ${full_path}"
-    echo "$full_path"
-}
-
-
-send_email() {
-    echo 'Sending-email notification...'
-    EMAIL_SUBJECT="${HOSTNAME}: ${LOG_FILE} successfully."
-    echo "${EMAIL_SUBJECT}" $EMAIL_LIST
-    mailx -s "${EMAIL_SUBJECT}" $EMAIL_LIST < "${LOGDIR}/${LOG_FILE}"
+  if [[ -z "${LOG_FILE:-}" ]]; then
+    echo "ERROR: LOG_FILE is not set!"
+    return 1
+  fi
+  echo "$(date "+%Y-%m-%d %H:%M:%S") - $1" | tee -a "${LOGDIR}/${LOG_FILE}"
 }
 
 backup_and_remove_old_paths() {

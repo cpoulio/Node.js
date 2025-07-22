@@ -2,15 +2,15 @@
 #set -x
 shopt -s extglob
 set -euo pipefail
-###########################################################
+##########################################################
 echo "-------------------Starting Uninstall_from_Verify.sh Script----------------------------"
-source ./variables_functions.sh && echo 'Sourced: variables_functions.sh'
-source ./verify.sh && echo 'Sourced: verify.sh'
-ACTION_PERFORMED="Uninstall_from_Verify"
-LOG_FILE=$(generate_log_file_name)
+source ./variables_functions.sh
+source ./verify.sh
 
 uninstall_from_verify() {
 
+    ACTION_PERFORMED="Uninstall_from_Verify"
+    LOG_FILE="node-${NODE_VERSION}-${LINUX_DISTRO}-${ACTION_PERFORMED}-${DATE}.log"
     log "Starting ${ACTION_PERFORMED} ${SOFTWARENAME} Function"
 
     log "Running embedded verification to refresh candidate list..."
