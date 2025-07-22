@@ -11,7 +11,7 @@ source ./uninstall_from_verify.sh && echo 'Sourced: uninstall_from_verify.sh'
 source ./install.sh && echo 'Sourced: install.sh'
 echo "Starting Starting Update Uninstall All Script"
 ensure_root "$0"
-: <<'Description'
+
 # Description:
 # This script automates the installation of ${SOFTWARENAME}18 and verification in one step.
 # It dynamically sets the installation log file based on the detected ${SOFTWARENAME}18 Quickstart jar
@@ -25,9 +25,10 @@ ensure_root "$0"
 Description
 
 update_afte_uninstall_from_verify() {
-    log "Update_afte_Uninstall_from_Verify ${SOFTWARENAME} Function"
+
     ACTION_PERFORMED='Starting Update Uninstall All'
     LOG_FILE="node-${NODE_VERSION}-${LINUX_DISTRO}-${ACTION_PERFORMED}-${DATE}.log"
+    log "Starting Update Uninstall All ${SOFTWARENAME} function"
 
     #### UnInstall function ####
     uninstall_from_verify

@@ -9,7 +9,6 @@ EMAIL=""
 EMAIL_LIST=""
 source ./variables_functions.sh && echo 'Sourced: variables_functions.sh'
 echo "DEBUG in Main.sh: Deployment Directory=${deploy_dir}"
-ensure_root "$@"
 result="$(ensure_root)"
 echo "$result"
 

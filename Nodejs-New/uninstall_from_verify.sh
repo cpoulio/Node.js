@@ -12,9 +12,10 @@ echo "Starting Uninstall_from_Verify Script"
 ensure_root "$@"
 
 uninstall_from_verify() {
-    log "Starting Uninstall from Verify ${SOFTWARENAME} function"
+
     ACTION_PERFORMED='Starting Uninstall from Verify'
     LOG_FILE="node-${NODE_VERSION}-${LINUX_DISTRO}-${ACTION_PERFORMED}-${DATE}.log"
+    log "Starting Uninstall from Verify ${SOFTWARENAME} function"
 
     # Run verify to ensure log is up to date
     verify

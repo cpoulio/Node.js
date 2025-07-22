@@ -22,10 +22,11 @@ source ./install.sh && echo 'Sourced: install.sh'
 # To add Email address NodeJS, run: ./Nodejs.sh EMAIL=email@irs.gov
 
 update() {
-    log "Starting Update ${SOFTWARENAME} Function"
+    
     ACTION_PERFORMED='Update'
     LOG_FILE="node-${NODE_VERSION}-${LINUX_DISTRO}-${ACTION_PERFORMED}-${DATE}.log"
-
+    log "Starting Update ${SOFTWARENAME} Function"
+    
     #### UnInstall function ####
     uninstall_from_verify
 

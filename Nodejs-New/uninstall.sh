@@ -12,10 +12,11 @@ echo "Starting Uninstall Script"
 ensure_root "$@"
 
 uninstall(){
-  log "Starting Uninstall ${SOFTWARENAME} Function"
+  
   ACTION_PERFORMED="Uninstall"
   LOG_FILE="${NODE_VERSION}-${LINUX_DISTRO}-${ACTION_PERFORMED}-${DATE}.log"
-
+  log "Starting Uninstall ${SOFTWARENAME} Function"
+  
   #Remove only the installed version
   if [ -d "${INSTALLDIR}/${NODEJSFILE}" ]; then
     rm -rf "${INSTALLDIR}/${NODEJSFILE}" && log "${SOFTWARENAME} ${NODEJSFILE} directory removed."
