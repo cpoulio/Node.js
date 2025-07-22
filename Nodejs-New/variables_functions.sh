@@ -5,7 +5,6 @@ set -euo pipefail
 
 ################################################################################
 echo "--------------------Starting Variables_Functions.sh Script--------------------"
-################################################################################
 
 MAIN_SCRIPT="main.sh"
 deploy_dir="./"  # Local Testing: Comment out when deploying with Ansible.

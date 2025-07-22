@@ -17,10 +17,12 @@
 
 shopt -s extglob
 set -euo pipefail
-
+##########################################################
+echo "-------------------Starting Verify.sh Script----------------------------"
 source ./variables_functions.sh
 
 verify() {
+
     ACTION_PERFORMED='Verify'
     LOG_FILE="node-${NODE_VERSION}-${LINUX_DISTRO}-${ACTION_PERFORMED}-${DATE}.log"
     log "Starting Verify ${SOFTWARENAME} Function"
@@ -33,7 +35,7 @@ verify() {
     npm_removal_count=0
     npx_removal_count=0
     symlink_removal_count=0
-    
+
     # ----- [Node.js Binaries by Location] -----
     echo "$(date +"%Y-%m-%d %H:%M:%S") - ----- [Node.js Binaries by Location] -----" | tee -a "$LOG_FILE"
     node_found=0
