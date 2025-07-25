@@ -42,6 +42,12 @@ echo "DATE=${DATE}"
 ################################################################################
 ## Common Functions ############################################################
 ################################################################################
+send_email() {
+    echo 'Sending-email notification...'
+    EMAIL_SUBJECT="${HOSTNAME}: ${LOG_FILE} successfully."
+    echo "${EMAIL_SUBJECT}" $EMAIL_LIST
+    mailx -s "${EMAIL_SUBJECT}" $EMAIL_LIST < "${LOGDIR}/${LOG_FILE}"
+}
 
 log() {
   if [[ -z "${LOG_FILE:-}" ]]; then
@@ -61,20 +67,37 @@ get_log_file_path() {
   [[ "$LOG_FILE" == /* ]] && echo "$LOG_FILE" || echo "${LOGDIR}/${LOG_FILE}"
 }
 
-backup_and_remove_old_paths() {
-  log 'Backing up and removing old paths from profile files...'
 
-  # Backup and remove old paths from profiles
-  for PROFILE in ~/.bash_profile ~/.profile ~/.bashrc ~/.zshrc; do
-    if [[ -f "$PROFILE" ]]; then
-      cp "$PROFILE" "${PROFILE}.bak" | tee -a "${LOGDIR}/${LOG_FILE}"
-      log "$PROFILE backed up"
-      sed -i "s|${INSTALLDIR//\//\\/}/node-v.*/bin/||" $PROFILE
-      sed -i "/export PATH=.*${NODE_BIN_DIR//\//\\/}/d" $PROFILE
-      log "$PROFILE updated to remove old paths"
-    fi
-  done
+remove_node_bin_dir_from_profiles() {
+    echo "----- Removing Node.js bin directories from all profile files -----"
+    # List of profile files to check
+    PROFILE_FILES=("$HOME/.bashrc" "$HOME/.bash_profile" "$HOME/.profile" "/etc/profile" /etc/profile.d/*)
+    
+    # Find all bin dirs ever referenced (from standard installs)
+    NODE_BIN_DIRS=(
+        "/usr/local/lib/nodejs/node-v"*"-linux-x64/bin"
+        "/usr/local/lib/nodejs/node-v"*"/bin"
+        "/usr/local/bin"
+    )
+
+    # Expand wildcards and remove duplicates
+    ALL_NODE_BINS=$(ls -d ${NODE_BIN_DIRS[@]} 2>/dev/null | sort -u)
+
+    for PROFILE in "${PROFILE_FILES[@]}"; do
+        [[ -f "$PROFILE" ]] || continue
+        for BIN_DIR in $ALL_NODE_BINS; do
+            # Escape slashes for sed
+            BIN_ESCAPED=$(echo "$BIN_DIR" | sed 's:/:\\/:g')
+            # Find and show matching lines
+            grep -F "export PATH=$BIN_DIR:\$PATH" "$PROFILE" && \
+                echo "Removing from $PROFILE: export PATH=$BIN_DIR:\$PATH"
+            # Remove the lines
+            sed -i "/export PATH=${BIN_ESCAPED}:\$PATH/d" "$PROFILE"
+        done
+    done
+    echo "----- Done cleaning profile files -----"
 }
+
 
 remove_nodejs_path_entries() {
   log 'Aggressively removing all Node.js PATH entries from all profile files and current environment...'

@@ -12,6 +12,7 @@ ensure_root "$@"
 
 ACTION_PERFORMED='Install and Verify'
 source ./variables_functions.sh && echo 'Sourced: variables_functions.sh'
+source ./verify.sh && echo 'Sourced: verify.sh'
 LOG_FILE="${ACTION_PERFORMED}.log"
 log 'Starting Install and Verify Function'
 
@@ -21,7 +22,7 @@ update_bash_profile() {
   log 'bash_profile backed up'
 
   sed -i -e 's|\$PATH:\$PATH:\$HOME/bin|\$PATH:\$HOME/bin|' ~/.bash_profile
-  echo "export PATH=$ {INSTALLDIR}/ ${NODEJSFILE}/bin:\$PATH" >> ~/.bash_profile
+  echo "export PATH=${INSTALLDIR}/${NODEJSFILE}/bin:\$PATH" >> ~/.bash_profile
   log '.bash_profile updated'
 
   # Prevent unbound variable error from /etc/bashrc
@@ -30,7 +31,7 @@ update_bash_profile() {
   fi
 
   # Reload profile in current script session
-  BASHRC SOURCED=1 . ~/.bash_profile
+  BASHRC_SOURCED=1 . ~/.bash_profile
   log 'Profile reloaded'
 
 }
@@ -152,7 +153,10 @@ install() {
 
     log "Installation and verification completed."
 
+    # Assuming verify is a function already sourced or available
+    verify
+
     # Skip send_email if not defined (test mode)
-    type send_email &>/dev/null && send_email || log "send_email function not found, skipping email."
+    send_email || log "send_email function not found, skipping email."
 }
 

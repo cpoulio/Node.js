@@ -66,4 +66,6 @@ verify() {
     done
 
     echo "----- [End of Audit] -----" 2>&1 | tee -a "$(get_log_file_path)"
+
+    send_email || log "send_email function not found, skipping email."
 }

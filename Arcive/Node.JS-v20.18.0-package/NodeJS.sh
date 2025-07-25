@@ -126,6 +126,8 @@ temp_profile() {
 backup_and_remove_old_paths() {
     log 'Backing up and removing old paths from profile files...'
 
+    NODE_BIN_DIR=$(dirname "$NODE_PATH")
+
     # Backup and remove old paths from profiles
     for PROFILE in ~/.bash_profile ~/.profile ~/.bashrc ~/.zshrc; do
         if [ -f "$PROFILE" ]; then
