@@ -1,56 +1,51 @@
 #!/bin/bash
-#set -x
-shopt -s extglob
 set -euo pipefail
-##########################################################
-echo "-------------------Starting Uninstall_from_Verify.sh Script----------------------------"
+
+# Source shared functions and verify function
 source ./variables_functions.sh
 source ./verify.sh
-ACTION_PERFORMED="Uninstall_from_Verify"
-LOG_FILE="node-${NODE_VERSION}-${LINUX_DISTRO}-${ACTION_PERFORMED}-${DATE}.log"
-log "Starting ${ACTION_PERFORMED} ${SOFTWARENAME} Function"
+
+LOG_FILE="uninstall_from_verify.log"
 
 uninstall_from_verify() {
+    log "------------------- Starting Uninstall_from_Verify.sh Script -------------------" 2>&1 | tee -a "$(get_log_file_path)"
+    log "Starting Uninstall_from_Verify NodeJS Function" 2>&1 | tee -a "$(get_log_file_path)"
 
-    log "Running embedded verification to refresh candidate list..."
+    log "Running initial verify to build fresh log..." 2>&1 | tee -a "$(get_log_file_path)"
     verify
 
-    latest_log=$(ls -t node-*-Verify-*.log 2>/dev/null | head -n1)
-    if [[ -z "$latest_log" ]]; then
-        log "No verify log file found. Cannot proceed with uninstall."
-        return 1
-    fi
+    VERIFY_LOG="/tmp/Verify.log"
+    log "Resolved verify log path: $VERIFY_LOG" 2>&1 | tee -a "$(get_log_file_path)"
 
-    log "Using verify log file: $latest_log"
+    # Count and list all REMOVAL CANDIDATE targets
+    removal_targets=$(grep '^REMOVAL CANDIDATE:' "$VERIFY_LOG" || true)
+    target_count=$(echo "$removal_targets" | grep -c '^REMOVAL CANDIDATE:' || true)
+    log "Found $target_count removal targets" 2>&1 | tee -a "$(get_log_file_path)"
+    echo "🔍 Total targets found: $target_count" 2>&1 | tee -a "$(get_log_file_path)"
 
-    mapfile -t targets < <(grep 'REMOVAL CANDIDATE' "$latest_log" | awk -F': ' '{print $2}' | awk '{print $1}')
-
-    if [[ ${#targets[@]} -eq 0 ]]; then
-        log "No removal candidates found."
-        return 0
-    fi
-
-    log "Starting removal of candidates..."
-
-    for path in "${targets[@]}"; do
-        if [[ -L "$path" ]]; then
-            log "Removing symlink: $path"
-            rm -f "$path"
-        elif [[ -f "$path" ]]; then
-            log "Removing file: $path"
-            rm -f "$path"
-        else
-            log "Path not found or already removed: $path"
+    # Remove all REMOVAL CANDIDATE paths, forcibly
+    echo "$removal_targets" | while IFS= read -r line; do
+        target=$(echo "$line" | cut -d: -f2- | sed 's/ (version:.*//; s/^[ \t]*//; s/[ \t]*$//')
+        if [[ -n "$target" ]]; then
+            echo "Removing: $target" 2>&1 | tee -a "$(get_log_file_path)"
+            rm -f "$target" 2>/dev/null || true
+            if [[ -e "$target" || -L "$target" ]]; then
+                echo "❌ FAILED TO REMOVE: $target" 2>&1 | tee -a "$(get_log_file_path)"
+            else
+                echo "✅ REMOVED: $target" 2>&1 | tee -a "$(get_log_file_path)"
+            fi
         fi
     done
 
-    log "Uninstall from verify completed."
-
-    log "Re-running Verify to confirm final Node.js state..."
+    log "Initial cleanup complete. Re-running verify to confirm final state..." 2>&1 | tee -a "$(get_log_file_path)"
+    echo "🔁 Re-running verification to confirm cleanup..." 2>&1 | tee -a "$(get_log_file_path)"
     verify
+
+    log "Uninstall_from_Verify process complete." 2>&1 | tee -a "$(get_log_file_path)"
+    echo "✅ Finished Uninstall from Verify process"
 }
 
-# Run only if called directly
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+# Only run if this script is called directly
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
     uninstall_from_verify
 fi

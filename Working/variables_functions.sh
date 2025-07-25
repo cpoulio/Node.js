@@ -12,8 +12,12 @@ SCRIPT="${deploy_dir}/${MAIN_SCRIPT}" # Uncomment for Ansible deployment
 echo "DEBUG in Main.sh: 'Deployment Directory=>${deploy_dir}'"
 
 ################################################################################
-VERSION="20.18.1"
-NPM_VERSION="10.8.1"
+VERSION="20.19.2"
+NPM_VERSION="10.8.2"
+
+# Exclusions: comma-separated. Example: "action-runner,java,control-m"
+EXCLUSION_LIST=${EXCLUSION_LIST:-"actions-runners"}
+EXCLUSION_PATTERN=$(echo "$EXCLUSION_LIST" | sed 's/,/|/g')
 
 ### Variables that Do Not Change Much #####
 SOFTWARENAME="NodeJS"
@@ -25,7 +29,7 @@ LINUX_DISTRO="linux-x64"
 NODEJSFILE="node-${NODE_VERSION}-${LINUX_DISTRO}"
 FILEPATH="${INSTALLDIR}/${NODEJSFILE}/bin"
 YUM_PACKAGES="openssl-devel bzip2-devel libicu-devel gcc-c++ make"
-DATE="$(date "+%Y-%m-%d %H-%M-%S")"
+DATE="$(date '+%Y-%m-%d-%H-%M-%S')"
 
 ### Check Variables ###
 echo "STARTING SCRIPT: ${SOFTWARENAME}"
@@ -40,14 +44,21 @@ echo "DATE=${DATE}"
 ################################################################################
 
 log() {
-    echo "${DATE} - $1" | tee -a "${LOGDIR}/${LOG_FILE}"
+  if [[ -z "${LOG_FILE:-}" ]]; then
+    echo "ERROR: LOG_FILE is not set!"
+    return 1
+  fi
+  echo "$(date '+%Y-%m-%d-%H-%M-%S') - $1" | tee -a "${LOGDIR}/${LOG_FILE}"
 }
 
-send_email() {
-    echo 'Sending-email notification...'
-    EMAIL_SUBJECT="${HOSTNAME}: ${LOG_FILE} successfully."
-    echo "${EMAIL_SUBJECT}" $EMAIL_LIST
-    mailx -s "${EMAIL_SUBJECT}" $EMAIL_LIST < "${LOGDIR}/${LOG_FILE}"
+# Return latest Verify-related log (case-insensitive match on ACTION_PERFORMED=verify)
+get_latest_verify_log() {
+  find "$LOGDIR" -type f -iname "*verify*.log" -printf "%T@ %p\n" 2>/dev/null |
+    sort -n | tail -1 | cut -d' ' -f2-
+}
+
+get_log_file_path() {
+  [[ "$LOG_FILE" == /* ]] && echo "$LOG_FILE" || echo "${LOGDIR}/${LOG_FILE}"
 }
 
 backup_and_remove_old_paths() {

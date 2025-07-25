@@ -1,5 +1,7 @@
 #!/bin/bash
-#
+shopt -s extglob
+#set -x
+set -euo pipefail
 # This script performs a comprehensive audit and validation of Node.js installations on the system.
 #
 # Key Objectives:
@@ -15,106 +17,53 @@
 #
 # Comprehensive Node.js Audit Script
 
-shopt -s extglob
-set -euo pipefail
-##########################################################
-echo "-------------------Starting Verify.sh Script----------------------------"
-source ./variables_functions.sh
+# Source your variables and functions file—adjust the path if needed
 
 verify() {
-
     ACTION_PERFORMED='Verify'
-    LOG_FILE="${ACTION_PERFORMED}-${DATE}.log"
+    source ./variables_functions.sh && echo 'Sourced: variables_functions.sh'
+    LOG_FILE="${ACTION_PERFORMED}.log"
+
+    
+
+    echo "-------------------Starting Verify.sh Script $(date '+%Y-%m-%d-%H-%M-%S')----------------------------" 2>&1 | tee -a "$(get_log_file_path)"
     log "Starting Verify ${SOFTWARENAME} Function"
-    echo "$(date +"%Y-%m-%d %H:%M:%S") - ---------------------- Starting NodeJS System Audit & Candidate Script ----------------------" 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
-    echo "$(date +"%Y-%m-%d %H:%M:%S") - REMINDER: Backup your data before deleting any Node.js binaries or symlinks." 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
-    echo "$(date +"%Y-%m-%d %H:%M:%S") - ---------------------------" 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
 
-    # Candidate Counters
-    node_removal_count=0
-    npm_removal_count=0
-    npx_removal_count=0
-    symlink_removal_count=0
+    echo "----------- NodeJS Audit & Candidate Report -----------" 2>&1 | tee -a "$(get_log_file_path)"
+    echo "REMINDER: Review results carefully before deleting anything." 2>&1 | tee -a "$(get_log_file_path)"
 
-    # ----- [Node.js Binaries by Location] -----
-    echo "$(date +"%Y-%m-%d %H:%M:%S") - ----- [Node.js Binaries by Location] -----" 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
-    node_found=0
-    removal_candidates=0
+    declare -a search_paths=("/") 
+    node_binaries=("node" "npm" "npx")
 
-    while IFS= read -r node_path; do
-        if [[ "$node_path" == *"/usr/local/lib/nodejs/"* ]]; then
-            echo "$(date +"%Y-%m-%d %H:%M:%S") - REMOVAL CANDIDATE: $node_path (version: $("$node_path" -v 2>/dev/null || echo N/A))" 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
-            removal_candidates=$((removal_candidates+1))
-        else
-            echo "$(date +"%Y-%m-%d %H:%M:%S") - DO NOT TOUCH: $node_path (version: $("$node_path" -v 2>/dev/null || echo N/A))" 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
-        fi
-        node_found=1
-    done < <(find /usr/local/lib/nodejs /opt/actions-runners /root/.cache /usr/local/bin -type f -name 'node' 2>/dev/null)
+    for binary in "${node_binaries[@]}"; do
+        echo "----- [$binary Binaries] -----" 2>&1 | tee -a "$(get_log_file_path)"
 
-    if [[ "$node_found" -eq 0 ]]; then
-        echo "$(date +"%Y-%m-%d %H:%M:%S") - No Node.js binaries found." 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
-    fi
-
-    # ----- [npm Binaries by Location] -----
-    echo "$(date +"%Y-%m-%d %H:%M:%S") - ----- [npm Binaries by Location] -----" 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
-    npm_found=0
-    while IFS= read -r npm_path; do
-        if [[ "$npm_path" == *"/usr/local/lib/nodejs/"* ]]; then
-            echo "$(date +"%Y-%m-%d %H:%M:%S") - REMOVAL CANDIDATE: $npm_path (version: N/A)" 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
-        else
-            echo "$(date +"%Y-%m-%d %H:%M:%S") - DO NOT TOUCH: $npm_path (version: N/A)" 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
-        fi
-        npm_found=1
-    done < <(find /usr/local/lib/nodejs /opt/actions-runners /root/.cache /usr/local/bin -type f -name 'npm' 2>/dev/null)
-
-    if [[ "$npm_found" -eq 0 ]]; then
-        echo "$(date +"%Y-%m-%d %H:%M:%S") - No npm binaries found." 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
-    fi
-
-    # ----- [npx Binaries by Location] -----
-    echo "$(date +"%Y-%m-%d %H:%M:%S") - ----- [npx Binaries by Location] -----" 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
-    npx_found=0
-    while IFS= read -r npx_path; do
-        if [[ "$npx_path" == *"/usr/local/lib/nodejs/"* ]]; then
-            echo "$(date +"%Y-%m-%d %H:%M:%S") - REMOVAL CANDIDATE: $npx_path (version: N/A)" 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
-        else
-            echo "$(date +"%Y-%m-%d %H:%M:%S") - DO NOT TOUCH: $npx_path (version: N/A)" 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
-        fi
-        npx_found=1
-    done < <(find /usr/local/lib/nodejs /opt/actions-runners /root/.cache /usr/local/bin -type f -name 'npx' 2>/dev/null)
-
-    if [[ "$npx_found" -eq 0 ]]; then
-        echo "$(date +"%Y-%m-%d %H:%M:%S") - No npx binaries found." 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
-    fi
-
-    # ----- [Symlinks in System Bins] -----
-    echo "$(date +"%Y-%m-%d %H:%M:%S") - ----- [Symlinks in System Bins] -----" 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
-    for bin in node npm npx; do
-        for link in /usr/local/bin/$bin; do
-            if [ -L "$link" ]; then
-                target=$(readlink "$link")
-                if [[ "$target" == *"/usr/local/lib/nodejs/"* ]]; then
-                    echo "$(date +"%Y-%m-%d %H:%M:%S") - REMOVAL CANDIDATE SYMLINK: $link -> $target" 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
-                else
-                    echo "$(date +"%Y-%m-%d %H:%M:%S") - DO NOT TOUCH SYMLINK: $link -> $target" 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
-                fi
+        while IFS= read -r bin_path; do
+            if [[ "$bin_path" =~ $EXCLUSION_PATTERN ]]; then
+                status="DO NOT TOUCH"
+            else
+                status="REMOVAL CANDIDATE"
             fi
-        done
+            version=$("$bin_path" -v 2>/dev/null || echo "N/A")
+            echo "$status: $bin_path (version: $version)" 2>&1 | tee -a "$(get_log_file_path)"
+        done < <(find "${search_paths[@]}" -type f -name "$binary" 2>/dev/null)
     done
 
-    # ----- [Running Node.js Processes] -----
-    echo "$(date +"%Y-%m-%d %H:%M:%S") - ----- [Running Node.js Processes] -----" 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
+    echo "----- [Symlinks for Node.js] -----" 2>&1 | tee -a "$(get_log_file_path)"
+    while IFS= read -r symlink; do
+        target=$(readlink -f "$symlink")
+        if [[ "$target" =~ $EXCLUSION_PATTERN ]]; then
+            status="DO NOT TOUCH SYMLINK"
+        else
+            status="REMOVAL CANDIDATE"
+        fi
+        echo "$status: $symlink -> $target" 2>&1 | tee -a "$(get_log_file_path)"
+    done < <(find "${search_paths[@]}" -type l \( -name "node" -o -name "npm" -o -name "npx" \) 2>/dev/null)
+
+    echo "----- [Running Node.js Processes] -----" 2>&1 | tee -a "$(get_log_file_path)"
     pgrep -a node | while read -r pid cmd; do
-        echo "$(date +"%Y-%m-%d %H:%M:%S") - NODE PROCESS: $pid $cmd" 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
+        echo "NODE PROCESS: $pid $cmd" 2>&1 | tee -a "$(get_log_file_path)"
     done
 
-    echo "$(date +"%Y-%m-%d %H:%M:%S") - ----- [End of Node.js System Audit & Candidate List] -----" 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
-    echo 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
-    echo "See above and in $LOG_FILE for all Node.js locations and clear REMOVAL CANDIDATES."
-    echo "Review before deleting! This script does NOT delete anything."
+    echo "----- [End of Audit] -----" 2>&1 | tee -a "$(get_log_file_path)"
 }
-
-# Run only if called directly
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    verify
-fi

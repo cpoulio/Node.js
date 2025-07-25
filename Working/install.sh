@@ -7,32 +7,32 @@ set -euo pipefail
 
 echo "-------------------Starting Install.sh Script----------------------------"
 
-source ./variables_functions.sh && echo 'Sourced: variables_functions.sh'
-
 echo "Starting Install Script"
 ensure_root "$@"
 
 ACTION_PERFORMED='Install and Verify'
-LOG_FILE="node-${NODE_VERSION}-${LINUX_DISTRO}-${ACTION_PERFORMED}-${DATE}.log"
+source ./variables_functions.sh && echo 'Sourced: variables_functions.sh'
+LOG_FILE="${ACTION_PERFORMED}.log"
 log 'Starting Install and Verify Function'
 
 update_bash_profile() {
-    log 'Updating profile files...'
-    cp -p ~/.bash_profile ~/.bash_profile.bak
-    log 'bash_profile backed up'
+  log 'Updating profile files...'
+  cp -p ~/.bash_profile ~/.bash_profile.bak
+  log 'bash_profile backed up'
 
-    sed -i -e 's|\$PATH:\$PATH:$HOME/bin|:$PATH:$HOME/bin|' ~/.bash_profile
-    echo "export PATH=${INSTALLDIR}/${NODEJSFILE}/bin:\$PATH" >> ~/.bash_profile
-    log '.bash_profile updated'
+  sed -i -e 's|\$PATH:\$PATH:\$HOME/bin|\$PATH:\$HOME/bin|' ~/.bash_profile
+  echo "export PATH=$ {INSTALLDIR}/ ${NODEJSFILE}/bin:\$PATH" >> ~/.bash_profile
+  log '.bash_profile updated'
 
-    # Prevent unbound variable error from /etc/bashrc
-    if ! grep -q 'BASHRCSOURCED=' ~/.bash_profile; then
-        echo "export BASHRCSOURCED=1" >> ~/.bash_profile
-    fi
+  # Prevent unbound variable error from /etc/bashrc
+  if ! grep -q 'BASHRC SOURCED=1' ~/.bash_profile; then
+    echo "export BASHRC SOURCED=1" >> ~/.bash_profile
+  fi
 
-    # Reload profile in current script session
-    BASHRCSOURCED=1 . ~/.bash_profile
-    log 'Profile reloaded'
+  # Reload profile in current script session
+  BASHRC SOURCED=1 . ~/.bash_profile
+  log 'Profile reloaded'
+
 }
 
 temp_profile() {
@@ -42,16 +42,16 @@ temp_profile() {
 extract_nodejs() {
     if [ ! -f "${deploy_dir}/${NODEJSFILE}.tar.xz" ]; then
         log "${SOFTWARENAME} TAR not found."
-        return 1
+        exit 1
     else
         log "TAR Found ${NODEJSFILE}.tar.xz."
     fi
     log "Extracting ${NODEJSFILE}..."
     mkdir -p ${INSTALLDIR}
-    tar -xJf "${deploy_dir}/${NODEJSFILE}.tar.xz" -C ${INSTALLDIR} 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
+    tar -xJf "${deploy_dir}/${NODEJSFILE}.tar.xz" -C ${INSTALLDIR} 2>&1 | tee -a "$(get_log_file_path)"
     if [ $? -ne 0 ]; then
         log "Failed to extract ${NODEJSFILE}."
-        return 1
+        exit 1
     else
         log "Successfully extracted ${NODEJSFILE}."
     fi
@@ -59,18 +59,16 @@ extract_nodejs() {
 
 install_YUM_packages() {
     echo "Starting YUM Installation..."
-    yum install -y ${YUM_PACKAGES} 2>&1 | tee -a "${LOGDIR}/${LOG_FILE}"
+    yum install -y ${YUM_PACKAGES} 2>&1 | tee -a "$(get_log_file_path)"
     if [ $? -ne 0 ]; then
         log 'Failed to install prerequisites. Exiting.'
-        return 1
+        exit 1
     fi
     log 'Prerequisites libraries installed successfully.'
 }
 
 install() {
     log 'Starting Install and Verify Function'
-    ACTION_PERFORMED='Install and Verify'
-    LOG_FILE="node-${NODE_VERSION}-${LINUX_DISTRO}-${ACTION_PERFORMED}-${DATE}.log"
     install_YUM_packages
     extract_nodejs
 
@@ -92,7 +90,7 @@ install() {
         log "Symbolic link for node created successfully and is executable."
     else
         log "Failed to create or set executable permission for symbolic link to node."
-        return 1
+        exit 1
     fi
 
     # Symlink npm
@@ -101,7 +99,7 @@ install() {
         log "Symbolic link for npm created successfully and is executable."
     else
         log "Failed to create or set executable permission for symbolic link to npm."
-        return 1
+        exit 1
     fi
 
     # Symlink npx
@@ -110,7 +108,7 @@ install() {
         log "Symbolic link for npx created successfully and is executable."
     else
         log "Failed to create or set executable permission for symbolic link to npx."
-        return 1
+        exit 1
     fi
 
     echo "Node Version Installed: ${NODE_VERSION}"
@@ -129,7 +127,7 @@ install() {
         log "npm updated to version ${NPMCHECK}"
     else
         log "npm update failed"
-        exit 2
+        return 2
     fi
 
     log 'Setting npm logging level...'
