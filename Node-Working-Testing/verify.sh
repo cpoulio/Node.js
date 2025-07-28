@@ -1,7 +1,7 @@
 #!/bin/bash
 shopt -s extglob
 #set -x
-#set -euo pipefail
+set -euo pipefail
 # This script performs a comprehensive audit and validation of Node.js installations on the system.
 #
 # Key Objectives:
@@ -24,6 +24,7 @@ verify() {
     source ./variables_functions.sh && echo 'Sourced: variables_functions.sh'
     LOG_FILE="${ACTION_PERFORMED}.log"
 
+    
 
     echo "-------------------Starting Verify.sh Script $(date '+%Y-%m-%d-%H-%M-%S')----------------------------" 2>&1 | tee -a "$(get_log_file_path)"
     log "Starting Verify ${SOFTWARENAME} Function"
@@ -60,18 +61,10 @@ verify() {
     done < <(find "${search_paths[@]}" -type l \( -name "node" -o -name "npm" -o -name "npx" \) 2>/dev/null)
 
     echo "----- [Running Node.js Processes] -----" 2>&1 | tee -a "$(get_log_file_path)"
-    echo "DEBUG: Before running pgrep" 2>&1 | tee -a "$(get_log_file_path)"
+    pgrep -a node | while read -r pid cmd; do
+        echo "NODE PROCESS: $pid $cmd" 2>&1 | tee -a "$(get_log_file_path)"
+    done
 
-    NODE_PIDS=$(pgrep -a node || true)
-    if [[ -n "$NODE_PIDS" ]]; then
-        echo "$NODE_PIDS" | while read -r pid cmd; do
-            echo "NODE PROCESS: $pid $cmd" 2>&1 | tee -a "$(get_log_file_path)"
-        done
-    else
-        echo "No Node.js processes running." 2>&1 | tee -a "$(get_log_file_path)"
-    fi
-
-    echo "DEBUG: After running pgrep" 2>&1 | tee -a "$(get_log_file_path)"
     echo "----- [End of Audit] -----" 2>&1 | tee -a "$(get_log_file_path)"
 
     send_email || log "send_email function not found, skipping email."

@@ -31,7 +31,7 @@ update_bash_profile() {
   fi
 
   # Reload profile in current script session
-  BASHRCSOURCED=1 . ~/.bash_profile
+  BASHRC_SOURCED=1 . ~/.bash_profile
   log 'Profile reloaded'
 
 }
@@ -154,7 +154,7 @@ install() {
     log "Installation and verification completed."
 
     # Assuming verify is a function already sourced or available
-    # verify
+    verify
 
     # Skip send_email if not defined (test mode)
     send_email || log "send_email function not found, skipping email."
