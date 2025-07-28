@@ -24,7 +24,6 @@ verify() {
     source ./variables_functions.sh && echo 'Sourced: variables_functions.sh'
     LOG_FILE="${ACTION_PERFORMED}.log"
 
-    
 
     echo "-------------------Starting Verify.sh Script $(date '+%Y-%m-%d-%H-%M-%S')----------------------------" 2>&1 | tee -a "$(get_log_file_path)"
     log "Starting Verify ${SOFTWARENAME} Function"

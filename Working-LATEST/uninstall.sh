@@ -1,15 +1,18 @@
 #!/bin/bash
+#set -x
+shopt -s extglob
 set -euo pipefail
+################################################################################
 
-# Source shared functions and verify function
-source ./variables_functions.sh
-source ./verify.sh
+uninstall() {
 
-LOG_FILE="uninstall_from_verify.log"
+    ACTION_PERFORMED='Uninstall'
+    source ./variables_functions.sh && echo 'Sourced: variables_functions.sh'
+    source ./verify.sh && echo 'Sourced: verify.sh'
+    LOG_FILE="${ACTION_PERFORMED}.log"
 
-uninstall_from_verify() {
-    log "------------------- Starting Uninstall_from_Verify.sh Script -------------------" 2>&1 | tee -a "$(get_log_file_path)"
-    log "Starting Uninstall_from_Verify NodeJS Function" 2>&1 | tee -a "$(get_log_file_path)"
+    log "------------------- Starting uninstall.sh Script -------------------" 2>&1 | tee -a "$(get_log_file_path)"
+    log "Starting uninstall NodeJS Function" 2>&1 | tee -a "$(get_log_file_path)"
 
     log "Running initial verify to build fresh log..." 2>&1 | tee -a "$(get_log_file_path)"
     verify
@@ -56,7 +59,7 @@ uninstall_from_verify() {
     echo "🔁 Re-running verification to confirm cleanup..." 2>&1 | tee -a "$(get_log_file_path)"
     verify
 
-    log "Uninstall_from_Verify process complete." 2>&1 | tee -a "$(get_log_file_path)"
+    log "uninstall process complete." 2>&1 | tee -a "$(get_log_file_path)"
     echo "✅ Finished Uninstall from Verify process"
 
     send_email || log "send_email function not found, skipping email."
@@ -64,5 +67,5 @@ uninstall_from_verify() {
 
 # Only run if this script is called directly
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
-    uninstall_from_verify
+    uninstall
 fi
