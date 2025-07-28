@@ -31,7 +31,7 @@ update_bash_profile() {
   fi
 
   # Reload profile in current script session
-  BASHRC_SOURCED=1 . ~/.bash_profile
+  BASHRCSOURCED=1 . ~/.bash_profile
   log 'Profile reloaded'
 
 }

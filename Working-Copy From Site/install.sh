@@ -30,16 +30,6 @@ update_bash_profile() {
         echo "export BASHRCSOURCED=1" >> ~/.bash_profile
     fi
 
-    # Auto-inject PATH cleanup to remove old node-v20.18.1 in future shells
-    if ! grep -q "Remove old NodeJS paths" ~/.bash_profile; then
-      cat << 'EOF' >> ~/.bash_profile
-
-# Remove old NodeJS paths (autoinjected)
-export PATH=$(echo "$PATH" | tr ':' '\n' | awk '!seen[$0]++' | grep -v "/usr/local/lib/nodejs/node-v20.18.1" | paste -sd:)
-EOF
-      log ".bash_profile patched to remove stale NodeJS paths automatically in future sessions."
-    fi
-
     # Reload profile in current script session
     BASHRCSOURCED=1 . ~/.bash_profile
     log 'Profile reloaded'
